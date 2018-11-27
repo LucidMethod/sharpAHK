@@ -8,7 +8,7 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === Windows Applications ===
+        // === Windows Applications ===
 
         /// <summary>
         /// Launch Windows Disk Manager
@@ -19,7 +19,7 @@ namespace sharpAHK
         }
 
         /// <summary>
-        /// Launch Windows MyComputer Window
+        /// Launch Windows MyComputer Window.
         /// </summary>
         public void MyComputer()
         {
@@ -35,7 +35,6 @@ namespace sharpAHK
         }
 
 
-        #endregion
 
     }
 }

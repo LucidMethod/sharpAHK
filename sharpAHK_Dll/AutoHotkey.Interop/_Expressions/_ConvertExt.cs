@@ -8,11 +8,8 @@ using System.Threading.Tasks;
 
 namespace AHKExpressions
 {
-    public static partial class StringExtension
+    public static partial class AHKExpressions
     {
-
-        #region === Convert ===
-
         /// <summary>Converts String/Int To Bool Variable Type</summary>
         /// <param name="TrueFalseVar">String/Int to Convert</param>
         /// <returns>Returns BOOL Variable Type From Input String/Int</returns>
@@ -344,6 +341,5 @@ namespace AHKExpressions
         }
 
 
-        #endregion
     }
 }

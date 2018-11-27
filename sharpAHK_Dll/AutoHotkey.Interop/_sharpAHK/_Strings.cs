@@ -10,7 +10,7 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === Strings ===
+        // === Strings ===
 
         /// <summary>Transforms a YYYYMMDDHH24MISS timestamp into the specified date/time format.</summary>
         /// <param name="YYYYMMDDHH24MISS">Leave this parameter blank to use the current local date and time. Otherwise, specify all or the leading part of a timestamp in the YYYYMMDDHH24MISS format. If the date and/or time portion of the timestamp is invalid -- such as February 29th of a non-leap year -- the date and/or time will be omitted from OutputVar. Although only years between 1601 and 9999 are supported, a formatted time can still be produced for earlier years as long as the time portion is valid.</param>
@@ -955,6 +955,5 @@ namespace sharpAHK
 
 
 
-        #endregion
     }
 }

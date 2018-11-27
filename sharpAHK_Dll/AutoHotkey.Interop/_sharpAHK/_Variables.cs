@@ -13,7 +13,7 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === Variables ===
+        // === Built in Variables ===
 
         #region === Convert Variable Types ===
 
@@ -124,7 +124,7 @@ namespace sharpAHK
         }
 
         /// <summary>convert string / int to IntPtr</summary>
-        /// <param name="object Input"> </param>
+        /// <param name="Input"> </param>
         /// <returns>Returns IntPtr Variable Type From Input String/Int</returns>
         public IntPtr ToIntPtr(object Input)
         {
@@ -144,7 +144,13 @@ namespace sharpAHK
             return nIntPtr;
         }
 
-        // untested
+        /// <summary>
+        /// Convert IntPtr to String (Untested)
+        /// </summary>
+        /// <param name="encoding"></param>
+        /// <param name="ptr"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public static string IntPtr_ToString(Encoding encoding, IntPtr ptr, int length)
         {
             //	null pointer = null string
@@ -197,7 +203,7 @@ namespace sharpAHK
 
 
         /// <summary>Returns a human-readable size discriptor for up 64-bit length fields (adds kb/mb/tb to return)</summary>
-        /// <param name="bytes">FileSize on Bytes</param>
+        /// <param name="fileBytes">FileSize on Bytes</param>
         /// <returns>Returns string with FileSize with Units (KB/MB/TB etc)</returns>
         public string FormatBytes(object fileBytes)
         {
@@ -1478,6 +1484,6 @@ namespace sharpAHK
         #endregion
 
 
-        #endregion
+
     }
 }

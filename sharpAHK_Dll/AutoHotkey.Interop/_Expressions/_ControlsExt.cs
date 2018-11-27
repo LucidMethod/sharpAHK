@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace AHKExpressions
 {
-    public static partial class StringExtension
+    public static partial class AHKExpressions
     {
         //  === Controls ===
 

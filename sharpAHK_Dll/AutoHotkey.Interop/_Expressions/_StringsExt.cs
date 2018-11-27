@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AHKExpressions
 {
-    public static partial class StringExtension
+    public static partial class AHKExpressions
     {
 
         // === Strings ===

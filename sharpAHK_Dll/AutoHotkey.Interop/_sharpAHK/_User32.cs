@@ -9,7 +9,7 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === User32 DLL Calls ===
+        // === User32 DLL Calls ===
 
 
         //       User32.dll (used in AHK Functions)
@@ -197,6 +197,5 @@ namespace sharpAHK
         }
 
 
-        #endregion
     }
 }

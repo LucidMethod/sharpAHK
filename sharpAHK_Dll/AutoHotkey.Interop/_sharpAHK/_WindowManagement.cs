@@ -9,7 +9,7 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === Windows Management ===
+        // === Windows Management ===
 
 
         /// <summary>Makes a window stay on top of all other windows. Use ON to turn on the setting, OFF to turn it off, or TOGGLE to set it to the opposite of its current state. If omitted, it defaults to TOGGLE. The word Topmost can be used in place of AlwaysOnTop.</summary>
@@ -491,19 +491,64 @@ namespace sharpAHK
         /// </summary>
         public enum WinGetCmd
         {
-            ID = 0,
-            IDLast = 1,
-            PID = 2,
-            ProcessName = 4,
-            Count = 5,
-            List = 6,
-            MinMax = 8,
-            ControlList = 9,
-            ControlListHwnd = 10,
-            Transparent = 11,
-            TransColor = 12,
-            Style = 13,
-            ExStyle = 14
+            /// <summary>
+            /// Retrieves the unique ID number (HWND/handle) of a window. If there is no matching window, OutputVar is made blank. The functions WinExist() and WinActive() can also be used to retrieve the ID of a window; for example, WinExist("A") is a fast way to get the ID of the active window. To discover the HWND of a control (for use with Post/SendMessage or DllCall), use ControlGet Hwnd or MouseGetPos.
+            /// </summary>
+            ID,
+            /// <summary>
+            /// Same as above except it retrieves the ID of the last/bottommost window if there is more than one match. If there is only one match, it performs identically to ID. This concept is similar to that used by WinActivateBottom.
+            /// </summary>
+            IDLast,
+            /// <summary>
+            /// Retrieves the Process ID (PID) of a window.
+            /// </summary>
+            PID,
+            /// <summary>
+            /// Retrieves the name of the process (e.g. notepad.exe) that owns a window. If there are no matching windows, OutputVar is made blank.
+            /// </summary>
+            ProcessName,
+            /// <summary>
+            /// Retrieves the number of existing windows that match the specified WinTitle, WinText, ExcludeTitle, and ExcludeText (0 if none). To count all windows on the system, omit all four title/text parameters. Hidden windows are included only if DetectHiddenWindows has been turned on. 
+            /// </summary>
+            Count,
+            /// <summary>
+            /// Retrieves the unique ID numbers of all existing windows that match the specified WinTitle, WinText, ExcludeTitle, and ExcludeText (to retrieve all windows on the entire system, omit all four title/text parameters). Each ID number is stored in an array element whose name begins with OutputVar's own name, while OutputVar itself is set to the number of retrieved items (0 if none). For example, if OutputVar is MyArray and two matching windows are discovered, MyArray1 will be set to the ID of the first window, MyArray2 will be set to the ID of the second window, and MyArray itself will be set to the number 2. Windows are retrieved in order from topmost to bottommost (according to how they are stacked on the desktop). Hidden windows are included only if DetectHiddenWindows has been turned on. Within a function, to create an array that is global instead of local, declare MyArray as a global variable prior to using this command (the converse is true for assume-global functions).
+            /// </summary>
+            List,
+            /// <summary>
+            /// Retrieves the minimized/maximized state for a window. OuputVar is made blank if no matching window exists; otherwise, it is set to one of the following numbers:
+            /// -1: The window is minimized (WinRestore can unminimize it). 
+            /// 1: The window is maximized(WinRestore can unmaximize it).
+            /// 0: The window is neither minimized nor maximized.
+            /// </summary>
+            MinMax,
+            /// <summary>
+            /// Retrieves the control names for all controls in a window. If no matching window exists or there are no controls in the window, OutputVar is made blank. Otherwise, each control name consists of its class name followed immediately by its sequence number (ClassNN), as shown by Window Spy.
+            /// Each item except the last is terminated by a linefeed (`n). To examine the individual control names one by one, use a parsing loop as shown in the examples section below.
+            /// Controls are sorted according to their Z-order, which is usually the same order as TAB key navigation if the window supports tabbing.
+            /// The control currently under the mouse cursor can be retrieved via MouseGetPos.
+            /// </summary>
+            ControlList,
+            /// <summary>
+            /// Same as above except it retrieves the window handle (HWND) of each control rather than its ClassNN.
+            /// </summary>
+            ControlListHwnd,
+            /// <summary>
+            /// Retrieves the degree of transparency of a window (see WinSet for how to set transparency). OutputVar is made blank if: 1) the OS is older than Windows XP; 2) there are no matching windows; 3) the window has no transparency level; or 4) other conditions (caused by OS behavior) such as the window having been minimized, restored, and/or resized since it was made transparent. Otherwise, a number between 0 and 255 is stored, where 0 indicates an invisible window and 255 indicates an opaque window. 
+            /// </summary>
+            Transparent,
+            /// <summary>
+            /// Retrieves the color that is marked transparent in a window (see WinSet for how to set the TransColor). OutputVar is made blank if: 1) the OS is older than Windows XP; 2) there are no matching windows; 3) the window has no transparent color; or 4) other conditions (caused by OS behavior) such as the window having been minimized, restored, and/or resized since it was made transparent. Otherwise, a six-digit hexadecimal RGB color is stored, e.g. 0x00CC99.
+            /// </summary>
+            TransColor,
+            /// <summary>
+            /// Retrieves an 8-digit hexadecimal number representing style or extended style (respectively) of a window. If there are no matching windows, OutputVar is made blank. The following example determines whether a window has the WS_DISABLED style:
+            /// </summary>
+            Style,
+            /// <summary>
+            /// Retrieves an 8-digit hexadecimal number representing style or extended style (respectively) of a window. If there are no matching windows, OutputVar is made blank. The following example determines whether a window has the WS_DISABLED style:
+            /// </summary>
+            ExStyle
         }
 
         /// <summary>
@@ -1395,6 +1440,5 @@ namespace sharpAHK
 
 
 
-        #endregion
     }
 }

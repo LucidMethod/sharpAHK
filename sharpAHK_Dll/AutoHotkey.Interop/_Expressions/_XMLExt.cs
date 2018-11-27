@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace AHKExpressions
 {
-    public static partial class StringExtension
+    public static partial class AHKExpressions
     {
         // === XML ===
 

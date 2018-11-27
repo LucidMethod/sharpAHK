@@ -12,7 +12,8 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === Lists ===
+        // === Lists ===
+
 
         #region === Lists: Management ===
 
@@ -340,7 +341,7 @@ namespace sharpAHK
 
         #region === Lists: Populate ===
 
-        /// <summary>Converts text from a text file to list <string></summary>
+        /// <summary>Converts text from a text file to string List</summary>
         /// <param name="TextString"> </param>
         /// <param name="SkipBlankLines"> </param>
         /// <param name="Trim"> </param>
@@ -378,7 +379,7 @@ namespace sharpAHK
             return list;
         }
 
-        /// <summary>Converts numbers from a text file to list <int></summary>
+        /// <summary>Converts numbers from a text file to int List</summary>
         /// <param name="TextString"> </param>
         /// <param name="SkipBlankLines"> </param>
         /// <param name="SkipCommentLines"> </param>
@@ -418,7 +419,7 @@ namespace sharpAHK
             return list;
         }
 
-        /// <summary>Read text file, return list <string></summary>
+        /// <summary>Read text file, return string List</summary>
         /// <param name="FilePath"> </param>
         /// <param name="SkipBlankLines"> </param>
         /// <param name="Trim"> </param>
@@ -497,7 +498,7 @@ namespace sharpAHK
             return keys;
         }
 
-        /// <summary>Returns list of Dictionary Values <string></summary>
+        /// <summary>Returns list of string Dictionary Values</summary>
         /// <param name="Dictionary<string"> </param>
         /// <param name=" string> dictionary"> </param>
         public List<string> Dict_ValueList(Dictionary<string, string> dictionary)
@@ -507,9 +508,8 @@ namespace sharpAHK
             return returnlist;
         }
 
-        /// <summary>Returns list of Dictionary Values <string></summary>
-        /// <param name="Dictionary<string"> </param>
-        /// <param name=" int> dictionary"> </param>
+        /// <summary>Returns list of string Dictionary Values</summary>
+        /// <param name="Dictionary"> </param>
         public List<int> Dict_ValueListInt(Dictionary<string, int> dictionary)
         {
             // Get a List of all the values
@@ -602,6 +602,49 @@ namespace sharpAHK
 
             return filelistSorted;
         }
+
+
+        /// <summary>
+        /// Returns List of Files (Default sorted largest to smallest) size
+        /// </summary>
+        /// <param name="DirPath">Folder Path</param>
+        /// <param name="ExtTypes">File Extentions to Search For</param>
+        /// <param name="Descending">Largest to Smallest FileSize</param>
+        /// <param name="Recurse">Search into SubFolders</param>
+        /// <returns></returns>
+        public List<string> FileList_SortedSize(string DirPath, string ExtTypes = "*.*", bool Descending = true, bool Recurse = true)
+        {
+            List<string> files = new List<string>();
+
+            // File names.
+            string[] fns; // = Directory.GetFiles(DirPath, ExtTypes, SearchOption.AllDirectories);
+
+            if (Recurse) { fns = Directory.GetFiles(DirPath, ExtTypes, SearchOption.AllDirectories); }
+            else { fns = Directory.GetFiles(DirPath, ExtTypes, SearchOption.TopDirectoryOnly); }
+
+
+            // Order by size.
+            var sort = from fn in fns
+                       orderby new FileInfo(fn).Length descending
+                       select fn;
+
+            if (!Recurse) // option for smallest to largest
+            {
+                sort = from fn in fns
+                       orderby new FileInfo(fn).Length ascending
+                       select fn;
+            }
+
+            // List files.
+            foreach (string n in sort)
+            {
+                files.Add(n);
+            }
+
+            return files;
+        }
+
+
 
         // TODO: Finish 
 
@@ -1119,9 +1162,6 @@ namespace sharpAHK
 
 
 
-
-
-        #endregion
 
     }
 }

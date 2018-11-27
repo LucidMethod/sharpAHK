@@ -9,8 +9,6 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === Hotkeys ===
-
         // Example Use:
 
         // Define Hotkey Combinations and Actions to Execute
@@ -125,7 +123,6 @@ namespace sharpAHK
         }
 
 
-
         /// <summary>Creates, modifies, enables, or disables a hotkey while the script is running.</summary>
         /// <param name="KeyName">Name of the hotkey's activation key, including any modifier symbols. For example, specify #c for the Win+C hotkey. If KeyName already exists as a hotkey, that hotkey will be updated with the values of the command's other parameters. KeyName can also be the name of an existing hotkey label (i.e. a double-colon label), which will cause that hotkey to be updated with the values of the command's other parameters. When specifying an existing hotkey, KeyName is not case sensitive. However, the names of keys must be spelled the same as in the existing hotkey (e.g. Esc is not the same as Escape for this purpose). Also, the order of modifier symbols such as ^!+# does not matter. The current IfWin setting determines the variant of a hotkey upon which the Hotkey command will operate. If the variant does not yet exist, it will be created. When a hotkey is first created -- either by the Hotkey command or a double-colon label in the script -- its key name and the ordering of its modifier symbols becomes the permanent name of that hotkey as reflected by A_ThisHotkey. This name does not change even if the Hotkey command later accesses the hotkey with a different symbol ordering. </param>
         /// <param name="Label">The label name whose contents will be executed (as a new thread) when the hotkey is pressed. Both normal labels and hotkey/hotstring labels can be used. The trailing colon(s) should not be included. If Label is dynamic (e.g. %VarContainingLabelName%), IsLabel(VarContainingLabelName) may be called beforehand to verify that the label exists. This parameter can be left blank if KeyName already exists as a hotkey, in which case its label will not be changed. This is useful to change only the hotkey's Options. If the label is specified but the hotkey is disabled from a previous use of this command, the hotkey will remain disabled. To prevent this, include the word ON in Options. This parameter can also be one of the following special values: On: The hotkey becomes enabled. No action is taken if the hotkey is already On. Off: The hotkey becomes disabled. No action is taken if the hotkey is already Off. Toggle: The hotkey is set to the opposite state (enabled or disabled). AltTab (and others): These are special Alt-Tab hotkey actions that are described here. Note: The current IfWin setting determines the variant of a hotkey upon which On/Off/Toggle will operate.</param>
@@ -168,6 +165,5 @@ namespace sharpAHK
         }
 
 
-        #endregion
     }
 }

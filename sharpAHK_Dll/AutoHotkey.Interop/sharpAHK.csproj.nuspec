@@ -2,8 +2,8 @@
 <package >
   <metadata>
     <id>C:\_Code\radProjects\radDLLs\sharpAHK\sharpAHK_Dll\AutoHotkey.Interop\sharpAHK.csproj</id>
-	<authors>LucidMethods</author>
-    <version>1.0.0.3</version>
+	<authors>LucidMethod</authors>
+    <version>1.0.0.4</version>
     <owners>LucidMethod</owners>
     <licenseUrl></licenseUrl>
     <projectUrl></projectUrl>

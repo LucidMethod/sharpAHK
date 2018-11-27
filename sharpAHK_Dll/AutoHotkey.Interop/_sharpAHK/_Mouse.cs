@@ -9,10 +9,11 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === Mouse Control ===
+        // === Mouse Control ===
 
         /// <summary>Clicks a mouse button at the specified coordinates.</summary>
         /// <param name="Command">Ex: Right 44, 55 | Down | 44, 55</param>
+        /// <example>ahk.Click("Right 45, 55");</example>
         public void Click(string Command = "")
         {
             ErrorLog_Setup(false);
@@ -307,6 +308,5 @@ namespace sharpAHK
             Execute("SetDefaultMouseSpeed, " + Delay + "," + Play);
         }
 
-        #endregion
     }
 }
