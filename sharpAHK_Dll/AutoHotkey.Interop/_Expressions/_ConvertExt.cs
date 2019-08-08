@@ -14,7 +14,7 @@ namespace AHKExpressions
         /// <summary>Converts String/Int To Bool Variable Type</summary>
         /// <param name="TrueFalseVar">String/Int to Convert</param>
         /// <returns>Returns BOOL Variable Type From Input String/Int</returns>
-        public static bool ToBool(this object TrueFalseVar)
+        public static bool ToBool(this object TrueFalseVar)  
         {
             if (TrueFalseVar == null) { return false; }
             _AHK ahk = new _AHK();
