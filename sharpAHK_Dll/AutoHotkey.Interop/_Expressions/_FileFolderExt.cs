@@ -312,6 +312,14 @@ namespace AHKExpressions
             return ahk.FileName(FilePath, CheckIfExists);
         }
 
+        /// <summary>Returns File Name (with Extension)</summary>
+        /// <param name="file">File Object to Parse</param>
+        public static string FileName(this FileInfo file)
+        {
+            _AHK ahk = new _AHK();
+            return ahk.FileName(file.ToString(), false);
+        }
+
         /// <summary>Separates a file path - returns file name (no extension)</summary>
         /// <param name="FilePath">File Location to Parse</param>
         /// <param name="CheckIfExists">Option to check to see if FilePath exists - FileNameNoExt returns blank if file not found</param>

@@ -49,8 +49,10 @@ namespace sharpAHK
                     //Run(SaveFile);
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                _AHK ahk = new _AHK();
+                ahk.MsgBox(ex.ToString());
                 return "";
             }
 

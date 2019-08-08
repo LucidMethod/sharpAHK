@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AutoHotkey.Interop</RootNamespace>
     <AssemblyName>sharpAHK</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -20,7 +20,6 @@
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -39,10 +38,9 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\sharpAHK.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -65,18 +63,8 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>CodeSignKeyFile.pfx</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualBasic, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>dlls\Microsoft.VisualBasic.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
@@ -119,12 +107,11 @@
     <Compile Include="_Expressions\_StringsExt.cs" />
     <Compile Include="_Expressions\_TreeViewExt.cs" />
     <Compile Include="_Expressions\_XMLExt.cs" />
-    <Compile Include="_sharpAHK\AHK.cs" />
     <Compile Include="Util\AutoHotkeyDllLoader.cs" />
     <Compile Include="Util\EmbededResourceHelper.cs" />
     <Compile Include="Util\ProcessorType.cs" />
+    <Compile Include="_sharpAHK\AHK.cs" />
     <Compile Include="_sharpAHK\_AutoHotkey.cs" />
-    <Compile Include="_sharpAHK\_Hotkeys.cs" />
     <Compile Include="_sharpAHK\_Clipboard.cs" />
     <Compile Include="_sharpAHK\_Controls.cs" />
     <Compile Include="_sharpAHK\_DateTime.cs" />
@@ -132,6 +119,7 @@
     <Compile Include="_sharpAHK\_Encryption.cs" />
     <Compile Include="_sharpAHK\_FileFolder.cs" />
     <Compile Include="_sharpAHK\_GUI.cs" />
+    <Compile Include="_sharpAHK\_Hotkeys.cs" />
     <Compile Include="_sharpAHK\_Images.cs" />
     <Compile Include="_sharpAHK\_INI.cs" />
     <Compile Include="_sharpAHK\_Lists.cs" />
@@ -160,7 +148,6 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="CodeSignKeyFile.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -174,6 +161,10 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

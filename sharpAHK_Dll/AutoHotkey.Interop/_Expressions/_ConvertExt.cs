@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sharpAHK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -15,27 +16,9 @@ namespace AHKExpressions
         /// <returns>Returns BOOL Variable Type From Input String/Int</returns>
         public static bool ToBool(this object TrueFalseVar)
         {
-            string VarType = TrueFalseVar.GetType().ToString();  //determine what kind of variable was passed into function
-
-            if (VarType == "System.Int32")
-            {
-                if (TrueFalseVar.ToString() == "1") { return true; }
-                if (TrueFalseVar.ToString() == "0") { return false; }
-            }
-
-            if (VarType == "System.String")
-            {
-                if (TrueFalseVar.ToString().ToUpper() == "TRUE") { return true; }
-                else { return false; }
-            }
-
-            if (VarType == "System.Boolean")
-            {
-                return (bool)TrueFalseVar;
-            }
-
-            MsgBox(VarType + " Not Setup For ToBool() Conversion");
-            return false;
+            if (TrueFalseVar == null) { return false; }
+            _AHK ahk = new _AHK();
+            return ahk.ToBool(TrueFalseVar);
         }
 
         /// <summary>Converts String/Bool To Int Variable Type</summary>
@@ -70,7 +53,7 @@ namespace AHKExpressions
 
             if (VarType == "System.String")
             {
-                if (Input == "") { return 0; }
+                if (Input.ToString() == "") { return 0; }
 
                 try
                 {
@@ -172,7 +155,7 @@ namespace AHKExpressions
         {
             string VarType = TimeString.GetType().ToString();  //determine what kind of variable was passed into function
 
-            if (VarType == "System.String" || VarType == "System.Int32")
+            if (VarType == "System.String" || VarType == "System.Int32" || VarType == "System.DBNull")
             {
                 DateTime enteredDate = new DateTime(1900, 1, 1);
                 try
@@ -309,6 +292,8 @@ namespace AHKExpressions
         /// <returns></returns>
         public static string VarType(this object Object, bool DisplayVarType = false)
         {
+            if (Object == null) { return ""; }
+
             string VarType = Object.GetType().ToString();  //determine what kind of variable was passed into function
 
             //### CONTROLS #########################

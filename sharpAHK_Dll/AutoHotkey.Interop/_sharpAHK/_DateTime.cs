@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -268,7 +269,19 @@ namespace sharpAHK
         }
 
 
+        public static Stopwatch stopwatch = new Stopwatch();
 
+        /// <summary>
+        /// Start/Stop StopWatch Timer
+        /// </summary>
+        /// <param name="Start"></param>
+        /// <returns></returns>
+        public string StopWatch(bool Start = true)
+        {
+            if (Start) { stopwatch = new Stopwatch(); stopwatch.Start(); }
+            else { stopwatch.Stop(); }
+            return StringSplit(stopwatch.Elapsed.ToString(), ".", 0);
+        }
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AHKExpressions;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -783,7 +784,8 @@ namespace sharpAHK
         /// <summary>Split string by character, Returns List of values separated by the SplitChar</summary>
         /// <param name="InText">Text to split</param>
         /// <param name="SplitChar">Character(s) to split string by</param>
-        public List<string> StringSplit_List(string InText, string SplitChar = "(")
+        /// <param name="SkipBlanks">Default Option To Not Return Blank Values in Return List</param>
+        public List<string> StringSplit_List(string InText, string SplitChar = "(", bool SkipBlanks = true)
         {
             if (InText == null) { return new List<string>(); }
 
@@ -803,7 +805,8 @@ namespace sharpAHK
             foreach (string part in words)
             {
                 string addPart = part.Trim();
-                if (addPart != "") { returnList.Add(part); }  // don't add blank values
+                if (SkipBlanks) { if (addPart != "") { returnList.Add(part); } }  // don't add blank values
+                else { returnList.Add(part); }
             }
 
             return returnList;
@@ -953,6 +956,434 @@ namespace sharpAHK
             return TitleText.Decode();
         }
 
+
+        #region === Object Strings (ObjStrings) ===
+
+
+        /// <summary>
+        /// Used for Object Strings Separated by '|' - this temporarily replaces with temp char to void parsing errors
+        /// </summary>
+        /// <param name="Text">Text Potentially Containing '|' to Replace</param>
+        /// <returns></returns>
+        public string ObjStringFix(string Text)
+        {
+            string text = Text.Replace("|", "Î");
+            return text;
+        }
+
+        /// <summary>
+        /// Restores Object String Value, Adding Back Replaced Temp Character
+        /// </summary>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public string ObjStringRestore(string Text)
+        {
+            string text = Text.Replace("Î", "|");
+            return text;
+        }
+
+        /// <summary>
+        /// Convert Object String to Dictionary (object name, Col1, Val1, Col2...)
+        /// </summary>
+        /// <param name="ObjString"></param>
+        /// <returns></returns>
+        public Dictionary<string, string> ObjStringToDict(string ObjString)
+        {
+            Dictionary<string, string> items = new Dictionary<string, string>();
+
+            List<string> lines = StringSplit_List(ObjString, "|", false);
+            int i = 1; bool first = true; string First = "";
+            foreach (string item in lines)
+            {
+                if (i == 1) { items.Add(item, item); i++; continue; }
+                if (first) { First = item; first = false; continue; }
+                if (!first) { items.Add(First.ObjStringRestore(), item.ObjStringRestore()); first = true; }
+                i++;
+            }
+
+            return items;
+        }
+
+
+        /// <summary>
+        /// Convert List of ObjectStrings to DataTable
+        /// </summary>
+        /// <param name="ObjStrings"></param>
+        /// <param name="Checked"></param>
+        /// <returns></returns>
+        public DataTable ObjectStringDTs(List<string> ObjStrings, bool Checked = false)
+        {
+            DataTable table = new DataTable();
+            table.Columns.Add("Selected", typeof(bool));
+            table.Columns.Add("FieldName", typeof(string));
+            table.Columns.Add("FieldValue", typeof(string));
+            table.Columns.Add("FieldType", typeof(string));
+
+            string cked = "False"; if (Checked) { cked = "True"; }
+
+            foreach (string ObjString in ObjStrings)
+            {
+                string VarType = "";
+                List<string> lines = StringSplit_List(ObjString, "|", false);
+                int i = 1; bool first = true; string First = ""; string Next = "";
+                foreach (string item in lines)
+                {
+                    if (VarType == "") { VarType = item; continue; }
+                    if (first) { First = item; first = false; continue; }
+                    if (!first)
+                    {
+                        try { table.Rows.Add(cked, First.ObjStringRestore(), item.ObjStringRestore(), VarType); } catch { table.Rows.Add(cked, First.ObjStringRestore(), "", VarType); }
+                        first = true;
+                    }
+                    i++;
+                }
+            }
+
+            return table;
+        }
+
+        /// <summary>
+        /// Convert ObjectString to DataTable
+        /// </summary>
+        /// <param name="ObjString">ObjectString Format</param>
+        public DataTable ObjStringDT(string ObjString)
+        {
+            DataTable table = new DataTable();
+            table.Columns.Add("Selected", typeof(bool));
+            table.Columns.Add("FieldName", typeof(string));
+            table.Columns.Add("FieldValue", typeof(string));
+            table.Columns.Add("FieldType", typeof(string));
+
+            string VarType = "";
+            List<string> lines = StringSplit_List(ObjString, "|", false);
+            int i = 1; bool first = true; string First = "";
+            foreach (string item in lines)
+            {
+                if (VarType == "") { VarType = item; continue; }
+                if (first) { First = item; first = false; continue; }
+                if (!first)
+                {
+                    try { table.Rows.Add("False", First.ObjStringRestore(), item.ObjStringRestore(), VarType); } catch { table.Rows.Add("False", First.ObjStringRestore(), "", VarType); }
+                    first = true;
+                }
+                i++;
+            }
+
+            return table;
+        }
+
+        /// <summary>
+        /// Extract the ObjectType from ObjectString
+        /// </summary>
+        /// <param name="ObjString">ObjectString Format</param>
+        /// <returns></returns>
+        public string ObjStringVarType(string ObjString)
+        {
+            List<string> lines = StringSplit_List(ObjString, "|", false);
+            foreach (string item in lines) { return item; }
+            return "";
+        }
+
+
+        public class dtLoop
+        {
+            public bool Checked { get; set; }
+            public string FieldName { get; set; }
+            public string FieldValue { get; set; }
+            public string FieldType { get; set; }
+            public string FieldCompare { get; set; }
+        }
+
+
+        /// <summary>
+        /// Convert DataTable to dtLoop List
+        /// </summary>
+        /// <param name="Table">DTLoop Table</param>
+        /// <returns></returns>
+        public List<dtLoop> DTLoop_DtToDtLoop(DataTable Table)
+        {
+            List<dtLoop> Items = new List<dtLoop>();
+
+            // loop through datatable
+            foreach (DataRow row in Table.Rows)
+            {
+                dtLoop Item = new dtLoop();
+                int i = 0;
+                foreach (var item in row.ItemArray)
+                {
+                    if (i == 0) { Item.Checked = item.ToBool(); }
+                    if (i == 1) { Item.FieldName = item.ToString(); }
+                    if (i == 2) { Item.FieldValue = item.ToString(); }
+                    if (i == 3) { Item.FieldType = item.ToString(); }
+                    i++; if (i > 3) { i = 0; }
+                }
+                Items.Add(Item);
+            }
+
+            return Items;
+        }
+
+
+        /// <summary>
+        /// Convert dtLoop List to DataTable
+        /// </summary>
+        /// <param name="LoopList">dtLoop List to Convert</param>
+        /// <returns></returns>
+        public DataTable DTLoop_ToDT(List<dtLoop> LoopList)
+        {
+            DataTable table = new DataTable();
+            table.Columns.Add("Selected", typeof(bool));
+            table.Columns.Add("FieldName", typeof(string));
+            table.Columns.Add("FieldValue", typeof(string));
+            table.Columns.Add("FieldType", typeof(string));
+
+            foreach (dtLoop row in LoopList)
+            {
+                try { table.Rows.Add(row.Checked, row.FieldName, ObjStringFix(row.FieldValue), row.FieldType); } catch { table.Rows.Add("False", row.FieldName, "NULL", row.FieldType); }
+            }
+
+            return table;
+        }
+
+
+        /// <summary>
+        /// Convert ObjString to DataTable
+        /// </summary>
+        /// <param name="RadGrid"></param>
+        /// <returns></returns>
+        public DataTable DTLoop_FromObjString(string ObjString)
+        {
+            DataTable table = new DataTable();
+            table.Columns.Add("Selected", typeof(bool));
+            table.Columns.Add("FieldName", typeof(string));
+            table.Columns.Add("FieldValue", typeof(string));
+            table.Columns.Add("FieldType", typeof(string));
+
+            string VarType = "";
+            List<string> lines = StringSplit_List(ObjString, "|", false);
+            int i = 1; string selected = ""; string fieldname = ""; string fieldvalue = ""; string fieldtype = "";
+            foreach (string item in lines)
+            {
+                if (VarType == "") { VarType = item; continue; }
+
+                if (i == 1) { selected = item; i++; continue; }
+                if (i == 2) { fieldname = item; i++; continue; }
+                if (i == 3) { fieldvalue = item; i++; continue; }
+                if (i == 4)
+                {
+                    fieldtype = item;
+                    try { table.Rows.Add(selected, fieldname, ObjStringRestore(fieldvalue), fieldtype); } catch { table.Rows.Add("False", fieldname, "", fieldtype); }
+                    i = 1;
+                }
+            }
+
+            return table;
+        }
+
+
+        /// <summary>
+        /// Convert ObjString to dtLoop List
+        /// </summary>
+        /// <param name="RadGrid"></param>
+        /// <returns></returns>
+        public List<dtLoop> DTLoop_DtLoopFromObjString(string ObjString)
+        {
+            List<dtLoop> Items = new List<dtLoop>();
+
+            string VarType = "";
+            List<string> lines = StringSplit_List(ObjString, "|", false);
+            int i = 1; string selected = ""; string fieldname = ""; string fieldvalue = ""; string fieldtype = "";
+            foreach (string item in lines)
+            {
+                if (VarType == "") { VarType = item; continue; }
+
+                if (i == 1) { selected = item; i++; continue; }
+                if (i == 2) { fieldname = item; i++; continue; }
+                if (i == 3) { fieldvalue = item; i++; continue; }
+                if (i == 4)
+                {
+                    fieldtype = item;
+
+                    dtLoop Item = new dtLoop();
+                    Item.Checked = selected.ToBool();
+                    Item.FieldName = fieldname;
+                    Item.FieldValue = ObjStringRestore(fieldvalue);
+                    Item.FieldType = fieldtype;
+                    Items.Add(Item);
+                }
+            }
+
+            return Items;
+        }
+
+
+        /// <summary>
+        /// Merge Two ObjString Lines from DTLoop Table
+        /// </summary>
+        /// <param name="MainObjString"></param>
+        /// <param name="AddObjString"></param>
+        /// <returns></returns>
+        public string DTLoop_CombineObjStrings(string MainObjString, string AddObjString)
+        {
+            // remove header from new objString
+            string VarType = "";
+            List<string> lines = StringSplit_List(AddObjString, "|", false);
+            foreach (string item in lines) { if (VarType == "") { VarType = item; break; } }
+
+            string add = AddObjString.Replace(VarType + "|", ""); // remove header from objString
+            string all = MainObjString + add;
+
+            return all;
+        }
+
+        /// <summary>
+        /// Convert List of ObjStrings to DataTable
+        /// </summary>
+        /// <param name="RadGrid"></param>
+        /// <returns></returns>
+        public DataTable DTLoop_FromObjStrings(List<string> ObjStrings)
+        {
+            DataTable table = new DataTable();
+            table.Columns.Add("Selected", typeof(bool));
+            table.Columns.Add("FieldName", typeof(string));
+            table.Columns.Add("FieldValue", typeof(string));
+            table.Columns.Add("FieldType", typeof(string));
+
+            foreach (string ObjString in ObjStrings)
+            {
+                string VarType = "";
+                List<string> lines = StringSplit_List(ObjString, "|", false);
+                int i = 1; string selected = ""; string fieldname = ""; string fieldvalue = ""; string fieldtype = "";
+                foreach (string item in lines)
+                {
+                    if (VarType == "") { VarType = item; continue; }
+                    if (i == 1) { selected = item; i++; continue; }
+                    if (i == 2) { fieldname = item; i++; continue; }
+                    if (i == 3) { fieldvalue = item; i++; continue; }
+                    if (i == 4)
+                    {
+                        fieldtype = item;
+                        try { table.Rows.Add(selected, fieldname, ObjStringRestore(fieldvalue), fieldtype); } catch { table.Rows.Add("False", fieldname, "", fieldtype); }
+                        i = 1;
+                    }
+                }
+            }
+
+            return table;
+        }
+
+
+        /// <summary>
+        /// Loop Through List of dtLoop Values, Returns True if Conditions List Matches All Values in ValuesList
+        /// </summary>
+        /// <param name="Values">Dataset of Values</param>
+        /// <param name="Conditions">Specific Values to Find and Match</param>
+        /// <param name="RequireAllConditionsFound">All Conditions Must Be Found In ValueList In Order To Be True</param>
+        /// <returns></returns>
+        public bool DTLoop_ConditionMatch(List<dtLoop> ValuesList, List<dtLoop> Conditions, out List<dtLoop> Results, bool RequireAllConditionsFound = true)
+        {
+            Results = new List<dtLoop>();
+            bool Matched = true;
+            int GoodMatches = 0;
+            int BadMatches = 0;
+            foreach (dtLoop value in ValuesList)
+            {
+                dtLoop result = new dtLoop();
+                foreach (dtLoop con in Conditions)
+                {
+                    if (value.FieldName == con.FieldName && value.FieldType == con.FieldType) // condition found list, compare value
+                    {
+                        result.FieldName = value.FieldName; result.FieldType = value.FieldType;
+
+                        if (value.FieldValue != con.FieldValue)
+                        {
+                            result.FieldValue = value.FieldValue + " != " + con.FieldValue + " (expected)";
+                            result.Checked = true;
+                            Matched = false; BadMatches++;
+                        }
+                        else
+                        {
+                            result.FieldValue = value.FieldValue + " = " + con.FieldValue;
+                            result.Checked = false;
+                            GoodMatches++;
+                        }
+                    }
+                }
+                Results.Add(result);
+            }
+            if (RequireAllConditionsFound) { if (GoodMatches != Conditions.Count) { Matched = false; } }
+            return Matched;
+        }
+
+        /// <summary>
+        /// Compare Two dtLoop Lists, Returns List of Value Differences
+        /// </summary>
+        /// <param name="BeforeList">Dataset of Values</param>
+        /// <param name="AfterList">Specific Values to Find and Match</param>
+        /// <returns></returns>
+        public List<dtLoop> DTLoop_DiffList(List<dtLoop> BeforeList, List<dtLoop> AfterList)
+        {
+            List<dtLoop> Diff = new List<dtLoop>();
+            foreach (dtLoop value in BeforeList)
+            {
+                foreach (dtLoop con in AfterList)
+                {
+                    if (value.FieldName == con.FieldName && value.FieldType == con.FieldType) // condition found list, compare value
+                    {
+                        dtLoop diff = new dtLoop();
+
+                        diff.FieldName = value.FieldName; diff.FieldType = value.FieldType;
+
+                        if (value.FieldValue != con.FieldValue)
+                        {
+                            diff.FieldValue = "(was) " + value.FieldValue + " (now) " + con.FieldValue;
+                            Diff.Add(diff);
+                        }
+                    }
+                }
+            }
+            return Diff;
+        }
+
+        public DataTable DTLoop_DiffDT(List<dtLoop> BeforeList, List<dtLoop> AfterList)
+        {
+            DataTable dt = new DataTable();
+            List<dtLoop> Diff = new List<dtLoop>();
+            foreach (dtLoop value in BeforeList)
+            {
+                foreach (dtLoop con in AfterList)
+                {
+                    if (value.FieldName == con.FieldName && value.FieldType == con.FieldType) // condition found list, compare value
+                    {
+                        dtLoop diff = new dtLoop();
+
+                        diff.FieldName = value.FieldName; diff.FieldType = value.FieldType;
+
+                        if (value.FieldValue != con.FieldValue)
+                        {
+                            diff.FieldValue = "(was) " + value.FieldValue + " (now) " + con.FieldValue;
+                            Diff.Add(diff);
+                        }
+                    }
+                }
+            }
+
+            return DTLoop_ToDT(Diff);
+        }
+
+        public DataTable DtLoop_ObjStringDiffDT(string BeforeObjString, string AfterObjString)
+        {
+            List<dtLoop> Before = DTLoop_DtLoopFromObjString(BeforeObjString);
+            List<dtLoop> After = DTLoop_DtLoopFromObjString(AfterObjString);
+            return DTLoop_DiffDT(Before, After);
+        }
+
+
+
+
+
+
+        #endregion
 
 
     }

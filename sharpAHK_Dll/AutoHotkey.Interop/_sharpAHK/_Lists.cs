@@ -350,6 +350,8 @@ namespace sharpAHK
         {
             List<string> list = new List<string>();
 
+            if (TextString == null || TextString == "") { return list; }
+
             // parse by new line
             {
                 // Creates new StringReader instance from System.IO
@@ -859,7 +861,7 @@ namespace sharpAHK
 
         /// <summary>Returns List of all WinTitles with ProcessName</summary>
         /// <param name="processName">Name of process to seach for</param>
-        public List<string> WinTitles_By_ProcessName(string processName = "mpc-hc64")
+        public List<string> WinTitles_By_ProcessName(string processName = "mpc-hc64", bool ExactMatch = true)
         {
             List<string> MPC_WinTitles = new List<string>();
 
@@ -869,13 +871,47 @@ namespace sharpAHK
             {
                 if (!String.IsNullOrEmpty(process.MainWindowTitle))
                 {
-                    if (process.ProcessName == processName) { MPC_WinTitles.Add(process.MainWindowTitle); }
+                    if (process.ProcessName.ToUpper() == processName.ToUpper())
+                    {
+                        MPC_WinTitles.Add(process.MainWindowTitle);
+                    }
+                    else if(process.ProcessName.ToUpper().Contains(processName.ToUpper()))
+                    {
+                        MPC_WinTitles.Add(process.MainWindowTitle);
+                    }
+
                     //Console.WriteLine("Process: {0} ID: {1} Window title: {2}", process.ProcessName, process.Id, process.MainWindowTitle);
                 }
             }
 
             return MPC_WinTitles;
         }
+
+
+        /// <summary>
+        /// Returns List of Alphabet (to loop). If Start Letter Provided, Will Return All Letters Starting with That One
+        /// </summary>
+        /// <param name="StartLetter"></param>
+        /// <returns></returns>
+        public List<string> Letters(string StartLetter = "")
+        {
+            List<string> lets = new List<string>() { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+
+            if (StartLetter != "")
+            {
+                List<string> Lets = new List<string>();
+                bool start = false;
+                foreach (string let in lets)
+                {
+                    if (let.ToUpper() == StartLetter.ToUpper()) { start = true; }
+                    if (start) { Lets.Add(let); }
+                }
+                return Lets;
+            }
+
+            return lets;
+        }
+
 
         #endregion
 

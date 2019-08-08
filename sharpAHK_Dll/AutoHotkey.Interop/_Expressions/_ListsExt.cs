@@ -207,6 +207,29 @@ namespace AHKExpressions
         }
 
 
+        /// <summary>
+        /// Returns the Same List in Reverse Order
+        /// </summary>
+        /// <param name="aList"></param>
+        /// <returns></returns>
+        public static List<string> reverse(this List<string> aList)
+        {
+            List<string> rList = new List<string>();
+            if (aList == null) { return rList; }
+            if (aList.Count < 2) { rList = aList; }
+            else
+            {
+                int i = aList.Count - 1;
+                do
+                {
+                    rList.Add(aList[i]); 
+                    i--;
+                } while (i != -1);
+            }
+
+            return rList;
+        }
+
 
 
 
@@ -365,7 +388,7 @@ namespace AHKExpressions
         /// <param name="SkipBlankLines"> </param>
         /// <param name="Trim"> </param>
         /// <param name="SkipCommentLines"> </param>
-        public static List<string> ToList(this string TextString, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
+        public static List<string> toList(this string TextString, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
         {
             List<string> list = new List<string>();
 
@@ -448,7 +471,7 @@ namespace AHKExpressions
             if (File.Exists(FilePath))
             {
                 string ParseCode = FilePath.FileRead();
-                List<string> list = ParseCode.ToList(SkipBlankLines, Trim, SkipCommentLines);
+                List<string> list = ParseCode.toList(SkipBlankLines, Trim, SkipCommentLines);
                 return list;
             }
             else
@@ -1112,6 +1135,146 @@ namespace AHKExpressions
 
 
         #endregion
+
+
+        // === Dictionary ===
+
+        #region === Dictionary Actions ===
+
+        /// <summary>Sort Dictionary by Value</summary>
+        /// <param name="dict">Dictionary to Sort</param>
+        /// <param name="Reverse">Reverses the Alpha Sort from A-Z to Z-A</param>
+        public static Dictionary<string, string> SortByValue(this Dictionary<string, string> dict, bool Reverse = false)
+        {
+            Dictionary<string, string> returndict = new Dictionary<string, string>();
+
+            // Order by values.
+            // ... Use LINQ to specify sorting by value.
+            var items = from pair in dict
+                        orderby pair.Value ascending
+                        select pair;
+
+            if (Reverse)
+            {
+                // Reverse sort.
+                // ... Can be looped over in the same way as above.
+                items = from pair in dict
+                        orderby pair.Value descending
+                        select pair;
+            }
+
+            // Display results.
+            foreach (KeyValuePair<string, string> pair in items)
+            {
+                //Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
+
+                returndict.Add(pair.Key, pair.Value);
+            }
+
+            return returndict;
+        }
+
+
+        /// <summary>Sort Dictionary by Key</summary>
+        /// <param name="dict">Dictionary to Sort</param>
+        /// <param name="Reverse">Reverses the Alpha Sort from A-Z to Z-A</param>
+        public static Dictionary<string, string> SortByKey(this Dictionary<string, string> dict, bool Reverse = false)
+        {
+            Dictionary<string, string> returndict = new Dictionary<string, string>();
+
+            // Order by values.
+            // ... Use LINQ to specify sorting by value.
+            var items = from pair in dict
+                        orderby pair.Key ascending
+                        select pair;
+
+            if (Reverse)
+            {
+                // Reverse sort.
+                // ... Can be looped over in the same way as above.
+                items = from pair in dict
+                        orderby pair.Key descending
+                        select pair;
+            }
+
+            // Display results.
+            foreach (KeyValuePair<string, string> pair in items)
+            {
+                //Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
+
+                returndict.Add(pair.Key, pair.Value);
+            }
+
+            return returndict;
+        }
+
+
+
+        /// <summary>Converts Dictionary to DataTable</summary>
+        /// <param name="dictionary">Dictionary to Convert</param>
+        /// <param name="KeyField">DataTable Column Header for Key Column</param>
+        /// <param name="ValueField">DataTable Column Header for Value Column</param>
+        public static DataTable ToDataTable(this Dictionary<string, string> dictionary, string KeyField = "Key", string ValueField = "Value")
+        {
+            // Here we create a DataTable with four columns.
+            DataTable table = new DataTable();
+            table.Columns.Add(KeyField, typeof(string));
+            table.Columns.Add(ValueField, typeof(string));
+
+            // Use var keyword to enumerate dictionary.
+            foreach (var pair in dictionary)
+            {
+                table.Rows.Add(pair.Key, pair.Value);
+            }
+
+            return table;
+        }
+
+
+        /// <summary>
+        /// Returns Dictionary Value from Key
+        /// </summary>
+        /// <param name="Dict"></param>
+        /// <param name="KeyName"></param>
+        /// <returns></returns>
+        public static string Value(this Dictionary<string, string> Dict, string KeyName)
+        {
+            string val = "";
+
+            // See whether Dictionary contains this string.
+            if (Dict.ContainsKey(KeyName)) { val = Dict[KeyName]; }
+
+            return val;
+        }
+
+        /// <summary>Returns list<string> of Keys from Dictionary
+        /// <param name="dictionary"></param>
+        /// /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
+        public static List<string> KeyList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
+        {
+            // Get a List of all the Keys.
+            List<string> keys = new List<string>(dictionary.Keys);
+
+            if (SortAlpha) { keys = keys.ListSORT(); }
+
+            return keys;
+        }
+
+
+        /// <summary>Returns List of Values from Dictionary </summary>
+        /// <param name="dictionary"></param>
+        /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
+        public static List<string> ValueList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
+        {
+            // Get a List of all the values
+            List<string> values = new List<string>(dictionary.Values);
+            if (SortAlpha) { values = values.ListSORT(); }
+            return values;
+        }
+
+
+        #endregion
+
 
     }
 }

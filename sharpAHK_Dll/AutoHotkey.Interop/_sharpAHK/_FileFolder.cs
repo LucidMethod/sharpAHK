@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -517,13 +518,22 @@ namespace sharpAHK
         //    return OutVar;
         //}
 
-        /// <summary>Returns Directory size in Formatted Bytes FileSize Text</summary>
+
+        /// <summary>
+        /// Returns Directory size in Formatted Bytes FileSize Text
+        /// </summary>
         /// <param name="DirPath">Path of Directory to Return Size</param>
-        public string DirSize(string DirPath, bool FormatBytes = true)
+        /// <param name="FormatBytes">Option to Convert Return Value from Bytes to Formated. Ex: 4MB</param>
+        /// <param name="Recursive">Option to Search SubDirs for Total Folder Size</param>
+        /// <returns></returns>
+        public string DirSize(string DirPath, bool FormatBytes = true, bool Recursive = true)
         {
+            if (!Directory.Exists(DirPath)) { return ""; }
+
             // 1.
             // Get array of all file names.
-            string[] a = Directory.GetFiles(DirPath, "*.*", System.IO.SearchOption.AllDirectories);
+            string[] a = Directory.GetFiles(DirPath, "*.*", System.IO.SearchOption.TopDirectoryOnly);
+            if (Recursive) { a = Directory.GetFiles(DirPath, "*.*", System.IO.SearchOption.AllDirectories); }
 
             // 2.
             // Calculate total bytes of all files in a loop.
@@ -545,6 +555,37 @@ namespace sharpAHK
                 return sizeF;
             }
             return b.ToString();
+        }
+
+
+        /// <summary>
+        /// Returns List of Folders with FolderSize 
+        /// </summary>
+        /// <param name="RootDir"></param>
+        /// <param name="FormatBytes"></param>
+        /// <param name="Recursive"></param>
+        /// <param name="OutFile"></param>
+        /// <returns></returns>
+        public string DirSizeReport(string RootDir, bool FormatBytes = true, bool Recursive = false, string OutFile = "")
+        {
+            string Out = "DIRSIZE REPORT\n\r\n\r";
+
+            List<string> dirs = DirList(RootDir, "*.*", Recursive, true);
+
+            foreach(string dir in dirs)
+            {
+                string size = DirSize(dir, FormatBytes, true);
+                Out = Out + "\n" + dir + " (" + size + ")\n\r";
+            }
+
+            if (OutFile != "")
+            {
+                FileDelete(OutFile);
+                FileAppend(Out, OutFile);
+                Run(OutFile);
+            }
+
+            return Out;
         }
 
 
@@ -686,6 +727,75 @@ namespace sharpAHK
             }
         }
 
+        /// <summary>
+        /// Moves all files in subfolders to the RootDirPath, removes empty folders
+        /// </summary>
+        /// <param name="RootDirPath">Top Folder Containing Subfolders to Move All Files Into</param>
+        /// <param name="OverWriteDupes">Option to OverWrite Existing Files in RootDirPath with Same Name</param>
+        public void FileMoveToRoot(string RootDirPath, bool OverWriteDupes = true)
+        {
+            if (!Directory.Exists(RootDirPath)) { return; }
+
+            string[] a = Directory.GetFiles(RootDirPath, "*.*", System.IO.SearchOption.AllDirectories);
+
+            foreach(string file in a)
+            {
+                FileMove(file, RootDirPath + "\\" + FileName(file), OverWriteDupes);
+            }
+
+            RemoveEmptyDirs(RootDirPath);
+        }
+
+        /// <summary>
+        /// Loops through RootDirPath and Removes SubFolders that don't contain any files
+        /// </summary>
+        /// <param name="RootDirPath"></param>
+        /// <returns></returns>
+        public int RemoveEmptyDirs(string RootDirPath)
+        {
+            int removed = 0;
+
+            List<string> dirs = DirList(RootDirPath, "*.*", true, true);
+            if (dirs != null && dirs.Count > 0)
+            {
+                foreach (string dir in dirs)
+                {
+                    List<string> files = FileList(dir, "*.*", false);
+                    if (files != null)
+                    {
+                        if (files.Count == 0) { FileRemoveDir(dir, true); removed++; }
+                    }
+                }
+            }
+
+            dirs = DirList(RootDirPath, "*.*", true, true);
+            if (dirs != null && dirs.Count == 0)
+            {
+                List<string> files = FileList(RootDirPath, "*.*", true, false, true);
+                if (files != null && files.Count == 0)
+                {
+                    FileRemoveDir(RootDirPath); removed++;
+                }
+            }
+
+            return removed;
+        }
+
+
+        /// <summary>
+        /// Searches Directory for Specific File Format, Returns True if Located in Dir
+        /// </summary>
+        /// <param name="RootDirPath">Directory to Search</param>
+        /// <param name="Format">File Format To Search For (ex: *.txt)</param>
+        /// <returns></returns>
+        public bool DirContainsFormat(string RootDirPath, string Format = "*.rar")
+        {
+            if (!Directory.Exists(RootDirPath)) { return false; }
+            List<string> files = FileList(RootDirPath, Format, true);
+            if (files.Count > 0) { return true; }
+            return false;
+        }
+
 
         /// <summary>
         /// Loop through file pattern, return matches as list of full file paths
@@ -722,6 +832,7 @@ namespace sharpAHK
         /// <returns></returns>
         public int FileCount(string Directory, string SearchPattern = "*.*", bool IncludeFolders = false, bool Recurse = true)
         {
+            if (Directory.Trim() == "") { return 0; }
 
             string[] filelist = null;
 
@@ -1086,6 +1197,11 @@ namespace sharpAHK
         {
             if (FilePath == null || FilePath.Trim() == "") { return ""; }  // don't check if blank value passed in
 
+            if (FilePath.Contains("/"))  // ex: https://www.thetvdb.com/banners/posters/73141-6.jpg
+            {
+                return StringSplit(FilePath, "/", 0, true);
+            }
+
             if (CheckIfExists)
             {
                 if (File.Exists(FilePath))
@@ -1097,17 +1213,27 @@ namespace sharpAHK
             }
             else
             {
-                // temp fix? 
-                //System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
-                //return fileinfo.Name.ToString();
-
                 if (File.Exists(FilePath))
                 {
                     System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
                     return fileinfo.Name.ToString();
                 }
-                return "";
+                else
+                {
+                    return StringSplit(FilePath, @"\", 0, true); 
+                }
             }
+        }
+
+        /// <summary>
+        /// Returns File's Drive Letter
+        /// </summary>
+        /// <param name="FilePath"></param>
+        /// <returns></returns>
+        public string FileDrive(string FilePath)
+        {
+            if (FilePath == null || FilePath.Trim() == "") { return ""; }  // don't check if blank value passed in
+            return StringSplit(FilePath, ":", 0);
         }
 
         /// <summary>Separates a file path - returns file name (no extension)</summary>
@@ -1122,7 +1248,7 @@ namespace sharpAHK
                 if (File.Exists(FilePath))
                 {
                     System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
-                    return StringReplace(fileinfo.Name, fileinfo.Extension);
+                    return fileinfo.Name.Replace(fileinfo.Extension, "");
                 }
                 return "";
             }
@@ -1131,9 +1257,9 @@ namespace sharpAHK
                 //System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
 
                 string seg = StringSplit(FilePath, @"\", 0, true, true);
-                string ext = StringSplit(seg, ".", 1);
+                string ext = StringSplit(seg, ".", 0, true);
 
-                return StringReplace(seg, ext);
+                return StringReplace(seg, "." + ext);
             }
         }
 
@@ -1265,6 +1391,18 @@ namespace sharpAHK
             }
         }
 
+
+        /// <summary>
+        /// Returns File's Last Modified Date 
+        /// </summary>
+        /// <param name="FilePath"></param>
+        /// <returns></returns>
+        public DateTime FileModified(string FilePath)
+        {
+            FileInfo info = new FileInfo(FilePath);  // Get Attributes for file.
+            return info.LastWriteTime;
+        }
+
         // File Info
 
         /// <summary>Returns name of file size in bytes from file path</summary>
@@ -1389,6 +1527,7 @@ namespace sharpAHK
                 if (FileExt.ToUpper() == ".M4V") { return true; }
                 if (FileExt.ToUpper() == ".ASF") { return true; }
                 if (FileExt.ToUpper() == ".WMV") { return true; }
+                if (FileExt.ToUpper() == ".VOB") { return true; }
                 return false;
             }
             catch
@@ -1613,10 +1752,12 @@ namespace sharpAHK
         }
 
         /// <summary>Deletes a folder.</summary>
-        /// <param name="DirName">Name of the directory to delete, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
+        /// <param name="DirPath">Name of the directory to delete, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
         /// <param name="Recurse">Recurse = False - Do not remove files and sub-directories contained in DirName. In this case, if DirName is not empty, no action will be taken | True = Remove all files and subdirectories.</param>
         public bool FileRemoveDir(string DirPath, bool Recurse = false)
         {
+            if (!Directory.Exists(DirPath)) { return true; }
+
             string dirPath = DirPath.Replace(",", "`,");
 
             string AHKLine = "FileRemoveDir, " + dirPath + ", " + Recurse;  // ahk line to execute
@@ -1665,11 +1806,13 @@ namespace sharpAHK
         }
 
         /// <summary>Opens Directory in Windows Explorer Window (If Found), Returns False if there is an Error / Directory Not Found</summary>
-        /// <param name="DirPath">Path to directory to open in explorer</param>
+        /// <param name="DirPath">Path to directory to open in explorer. Can also pass in FilePath to Open File's Directory</param>
         /// <param name="CreateIfMissing">Option to Create Missing Directory instead of Returning False, Opens New Dir After Creating</param>
         public bool OpenDir(string DirPath, bool CreateIfMissing = false)
         {
             if (DirPath.Trim() == "" || DirPath == null) { return false; }
+
+            if (isFile(DirPath)) { DirPath = FileDir(DirPath); }  // if file passed in, open file's directory
 
             if (Directory.Exists(DirPath))
             {
@@ -2000,21 +2143,35 @@ namespace sharpAHK
 
         // TODO: Add Timeout to wait function
 
+        Stopwatch WaitForFileExistStopWatch = new Stopwatch();
+
         /// <summary>Waits for file to exist</summary>
         /// <param name="FileToWaitFor">File to search for, waiting until found</param>
-        public void WaitForFileExist(string FileToWaitFor)
+        /// <param name="TimeOutSeconds">Number of Seconds to Wait Before Timing Out</param>
+        /// <returns>Returns True If File Found, False if TimeOut Reached</returns>
+        public bool WaitForFileExist(string FileToWaitFor, int TimeOutSeconds = -1)
         {
-            bool FoundFile = false;
+            WaitForFileExistStopWatch = new Stopwatch();
+            WaitForFileExistStopWatch.Start();
+            bool FoundFile = false; bool TimedOut = false;
             while (FoundFile == false)
             {
-                if (File.Exists(FileToWaitFor))
-                {
-                    FoundFile = true;
-                }
-
+                if (File.Exists(FileToWaitFor)) { FoundFile = true; }
                 Sleep(500);
+
+                if (TimeOutSeconds != -1)  // if value provided, check to see if timeout reached
+                {
+                    if (WaitForFileExistStopWatch.Elapsed.TotalSeconds > TimeOutSeconds) { TimedOut = true; FoundFile = true; }
+                }
             }
+            WaitForFileExistStopWatch.Stop();
+            if (FoundFile && !TimedOut) { return true; }
+            else { return false; } // timeout reached, file not found
         }
+
+
+
+
 
         /// <summary>waits for file to exist, then returns it's contents as a string</summary>
         /// <param name="filePath"> </param>
@@ -2028,13 +2185,13 @@ namespace sharpAHK
         }
 
 
-        // File Lists
+        //========== File Lists =====================
 
         /// <summary>
         /// Returns List<string> of files in directory path
         /// </summary>
         /// <param name="DirPath"> </param>
-        /// <param name="SearchPattern"> </param>
+        /// <param name="SearchPattern">Normal Windows Search Param for Specific Search, or Provide Multiple Extensions ex: "mp3|wave"</param>
         /// <param name="Recurse"> </param>
         /// <param name="FileNameOnly"> </param>
         /// <param name="IncludeExt"> </param>
@@ -2042,11 +2199,16 @@ namespace sharpAHK
         {
             List<string> FileList = new List<string>();
 
-            if (!Directory.Exists(DirPath)) { return null; }
+            if (!Directory.Exists(DirPath)) { return FileList; }
 
             string[] files = null;
             if (Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); }
             if (!Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); }
+
+            if (SearchPattern.Contains("|"))
+            {
+                files = Directory.GetFiles("path_to_files").Where(file => Regex.IsMatch(file, @"^.+\.(" + SearchPattern + ")$")).ToArray();
+            }
 
 
             foreach (string file in files)  // loop through list of files and write file details to sqlite db
@@ -2094,6 +2256,32 @@ namespace sharpAHK
 
             return FileList;
         }
+
+        /// <summary>
+        /// Search Returns list of (ex: .cs) Files Modified Today 
+        /// </summary>
+        /// <param name="SearchRoot"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public List<FileInfo> ModifiedToday(string SearchRoot, string format = "cs")
+        {
+            string[] Files = Directory.GetFiles(SearchRoot, "*." + format, System.IO.SearchOption.AllDirectories);
+
+            List<FileInfo> files = new List<FileInfo>();
+
+            foreach (string file in Files)
+            {
+                System.IO.FileInfo fileinfo = new System.IO.FileInfo(file); //retrieve info about each file
+
+                if (fileinfo.LastWriteTime.Date == DateTime.Today)
+                {
+                    files.Add(fileinfo);
+                }
+            }
+
+            return files;
+        }
+
 
         /// <summary>
         /// Format String Removing Illegal Characters - Allowed to Save As File In Windows

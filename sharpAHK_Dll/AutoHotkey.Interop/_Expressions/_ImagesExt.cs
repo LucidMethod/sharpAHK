@@ -78,6 +78,21 @@ namespace AHKExpressions
             return ico;
         }
 
+        /// <summary>
+        /// Save Icon to File 
+        /// </summary>
+        /// <param name="IconToSave"></param>
+        /// <param name="SavePath"></param>
+        /// <returns></returns>
+        public static bool SaveICO(this Icon IconToSave, string SavePath)
+        {
+            using (FileStream fs = new FileStream(SavePath, FileMode.Create))
+                IconToSave.Save(fs);
+
+            if (File.Exists(SavePath)) { return true; }
+            else { return false; }
+        }
+
 
         ///// <summary>Convert Image Path (png, ico, exe) / Icon / ImageList (By Key) Item / or Returns Image if Provided</summary>
         ///// <param name="Image"> </param>
@@ -317,6 +332,11 @@ namespace AHKExpressions
             return FormatAccepted;
         }
 
+        /// <summary>
+        /// Returns Image's Width
+        /// </summary>
+        /// <param name="FilePath">Path to Image</param>
+        /// <returns></returns>
         public static int ImageWidth(this string FilePath)
         {
             _AHK ahk = new _AHK();
@@ -330,6 +350,11 @@ namespace AHKExpressions
             return BmW;
         }
 
+        /// <summary>
+        /// Returns Image's Height
+        /// </summary>
+        /// <param name="FilePath">Path to Image</param>
+        /// <returns></returns>
         public static int ImageHeight(this string FilePath)
         {
             Image Bmap = ToImage(FilePath);

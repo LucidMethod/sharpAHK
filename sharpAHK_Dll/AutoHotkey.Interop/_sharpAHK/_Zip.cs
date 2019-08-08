@@ -11,7 +11,7 @@ namespace sharpAHK
 {
     public partial class _AHK
     {
-        #region === Zip ===
+        // === Zip ===
 
         // using System.IO.Compression;
 
@@ -269,6 +269,5 @@ namespace sharpAHK
 
 
 
-        #endregion
     }
 }

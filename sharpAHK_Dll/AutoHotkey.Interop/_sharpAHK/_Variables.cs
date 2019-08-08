@@ -22,6 +22,7 @@ namespace sharpAHK
         /// <returns>Returns BOOL Variable Type From Input String/Int</returns>
         public bool ToBool(object TrueFalseVar)
         {
+            if (TrueFalseVar == null) { return false; }
             string VarType = TrueFalseVar.GetType().ToString();  //determine what kind of variable was passed into function
 
             if (VarType == "System.Int32")
@@ -32,8 +33,18 @@ namespace sharpAHK
 
             if (VarType == "System.String")
             {
-                if (TrueFalseVar.ToString().ToUpper() == "TRUE") { return true; }
+                if (TrueFalseVar.ToString().ToUpper() == "TRUE" || TrueFalseVar.ToString().ToUpper() == "YES") { return true; }
                 else { return false; }
+            }
+
+            if (VarType == "System.Boolean")
+            {
+                return (bool)TrueFalseVar;
+            }
+
+            if (VarType == "System.DBNull")
+            {
+                return false;
             }
 
             MsgBox(VarType + " Not Setup For ToBool() Conversion");
@@ -72,7 +83,7 @@ namespace sharpAHK
 
             if (VarType == "System.String")
             {
-                if (Input == "") { return 0; }
+                if (Input.ToString() == "") { return 0; }
 
                 try
                 {
@@ -128,6 +139,8 @@ namespace sharpAHK
         /// <returns>Returns IntPtr Variable Type From Input String/Int</returns>
         public IntPtr ToIntPtr(object Input)
         {
+            if (Input == null) { return new IntPtr(); }
+
             string VarType = Input.GetType().ToString();  //determine what kind of variable was passed into function
 
             IntPtr nIntPtr = new IntPtr(0);
@@ -177,9 +190,11 @@ namespace sharpAHK
         /// <returns>Returns DateTime Variable Type From TimeString</returns>
         public DateTime ToDateTime(object TimeString)
         {
+            if (TimeString == null) { return new DateTime(1900, 0, 0); }
+
             string VarType = TimeString.GetType().ToString();  //determine what kind of variable was passed into function
 
-            if (VarType == "System.String" || VarType == "System.Int32")
+            if (VarType == "System.String" || VarType == "System.Int32" || VarType == "System.DBNull")
             {
                 DateTime enteredDate = new DateTime(1900, 1, 1);
                 try
@@ -225,7 +240,6 @@ namespace sharpAHK
             {
                 bytes = (Int64)fileBytes;
             }
-
 
 
             if (bytes >= 0x1000000000000000) { return ((double)(bytes >> 50) / 1024).ToString("0.## EB"); }
@@ -423,6 +437,358 @@ namespace sharpAHK
         }
 
 
+        /// <summary>
+        /// Pass in Object and Variable Type To Check For, Returns True if Matched
+        /// </summary>
+        /// <param name="Object"></param>
+        /// <param name="TypeToCheck">Known Variable Type to Check For</param>
+        /// <param name="DebugMsg">Displays Attempted VarType When Failed to Match Known Types</param>
+        /// <returns></returns>
+        public bool IsVarType(object Object, varType TypeToCheck, bool DebugMsg = false)
+        {
+            string VarType = Object.GetType().ToString();  //determine what kind of variable was passed into function
+
+            //### WINFORMS #########################
+
+            if (VarType == "System.Windows.Forms.Button" && TypeToCheck == varType.Button) { return true; }
+            if (VarType == "System.Windows.Forms.CheckBox" && TypeToCheck == varType.CheckBox) { return true; }
+            if (VarType == "System.Windows.Forms.DataGridView" && TypeToCheck == varType.DataGridView) { return true; }
+            if (VarType == "System.Windows.Forms.ListBox" && TypeToCheck == varType.ListBox) { return true; }
+            if (VarType == "System.Windows.Forms.PictureBox" && TypeToCheck == varType.PictureBox) { return true; }
+            if (VarType == "System.Windows.Forms.TabControl" && TypeToCheck == varType.TabControl) { return true; }
+            if (VarType == "System.Windows.Forms.TabPage" && TypeToCheck == varType.TabPage) { return true; }
+            if (VarType == "System.Windows.Forms.TableLayoutPanel" && TypeToCheck == varType.TableLayoutPanel) { return true; }
+            if (VarType == "System.Windows.Forms.TextBox" && TypeToCheck == varType.TextBox) { return true; }
+            if (VarType == "System.Windows.Forms.ToolStripMenuItem" && TypeToCheck == varType.ToolStripMenuItem) { return true; }
+            if (VarType == "System.Windows.Forms.TreeView" && TypeToCheck == varType.TreeView) { return true; }
+            if (VarType == "ScintillaNET.Scintilla" && TypeToCheck == varType.Scintilla) { return true; }
+
+
+            //### TELERIK #########################
+
+            if (VarType == "Telerik.WinControls.UI.RadStatusStrip" && TypeToCheck == varType.RadStatusStrip) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadLabelElement" && TypeToCheck == varType.RadLabelElement) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadLabel" && TypeToCheck == varType.RadLabel) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadTextBox" && TypeToCheck == varType.RadTextBox) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadMultiColumnComboBox" && TypeToCheck == varType.RadMultiColumnComboBox) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadSplitContainer" && TypeToCheck == varType.RadSplitContainer) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadButton" && TypeToCheck == varType.RadButton) { return true; }
+            if (VarType == "Telerik.WinControls.UI.SplitPanel" && TypeToCheck == varType.SplitPanel) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadDropDownButton" && TypeToCheck == varType.RadDropDownButton) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadPageView" && TypeToCheck == varType.RadPageView) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadPageViewPage" && TypeToCheck == varType.RadPageViewPage) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadGridView" && TypeToCheck == varType.RadGridView) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadTreeView" && TypeToCheck == varType.RadTreeView) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadMenu" && TypeToCheck == varType.RadMenu) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadMenuItem" && TypeToCheck == varType.RadMenuItem) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadAutoCompleteBox" && TypeToCheck == varType.RadAutoCompleteBox) { return true; }
+
+            if (VarType == "Telerik.WinControls.UI.RadPanel" && TypeToCheck == varType.RadPanel) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadProgressBar" && TypeToCheck == varType.RadProgressBar) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadRibbonBar" && TypeToCheck == varType.RadRibbonBar) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadRibbonBarButtonGroup" && TypeToCheck == varType.RadRibbonBarButtonGroup) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadRibbonBarGroup" && TypeToCheck == varType.RadRibbonBarGroup) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadTextBoxElement" && TypeToCheck == varType.RadTextBoxElement) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadButtonElement" && TypeToCheck == varType.RadButtonElement) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadDropDownButtonElement" && TypeToCheck == varType.RadDropDownButtonElement) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadGalleryItem" && TypeToCheck == varType.RadGalleryItem) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RibbonTab" && TypeToCheck == varType.RibbonTab) { return true; }
+            if (VarType == "Telerik.WinControls.UI.CommandBarSeparator" && TypeToCheck == varType.CommandBarSeparator) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadDateTimePicker" && TypeToCheck == varType.RadDateTimePicker) { return true; }
+            if (VarType == "Telerik.WinControls.UI.CommandBarRowElement" && TypeToCheck == varType.CommandBarRowElement) { return true; }
+            if (VarType == "Telerik.WinControls.UI.CommandBarStripElement" && TypeToCheck == varType.CommandBarStripElement) { return true; }
+            if (VarType == "Telerik.WinControls.UI.CommandBarToggleButton" && TypeToCheck == varType.CommandBarToggleButton) { return true; }
+            if (VarType == "Telerik.WinControls.UI.CommandBarButton" && TypeToCheck == varType.CommandBarButton) { return true; }
+
+            if (VarType == "Telerik.WinControls.UI.Docking.RadDock" && TypeToCheck == varType.RadDock) { return true; }
+            if (VarType == "Telerik.WinControls.UI.Docking.DocumentContainer" && TypeToCheck == varType.DocumentContainer) { return true; }
+
+
+            //### VARIABLES #########################
+
+            if (VarType == "System.String" && TypeToCheck == varType.String) { return true; }
+            if (VarType == "System.DateTime" && TypeToCheck == varType.DateTime) { return true; }
+            if (VarType == "System.Boolean" && TypeToCheck == varType.Bool) { return true; }
+            if (VarType == "System.Int32" && TypeToCheck == varType.Int32) { return true; }
+            if (VarType == "System.Int64" && TypeToCheck == varType.Int64) { return true; }
+            if (VarType == "System.Long" && TypeToCheck == varType.Long) { return true; }
+            if (VarType == "System.IntPtr" && TypeToCheck == varType.IntPtr) { return true; }
+            if (VarType == "System.Double" && TypeToCheck == varType.Double) { return true; }
+
+            if (VarType == "System.Data.DataTable" && TypeToCheck == varType.DataTable) { return true; }
+
+            if (VarType == "System.Collections.Generic.List`1(System.String)" && TypeToCheck == varType.ListString) { return true; }
+            if (VarType == "System.Collections.Generic.List`1(System.Int32)" && TypeToCheck == varType.ListInt) { return true; }
+
+            if (VarType == "System.Collections.Generic.Dictionary`2[System.String, System.DateTime]" && TypeToCheck == varType.Dictionary_String_DateTime) { return true; }
+            if (VarType == "System.Collections.Generic.Dictionary`2[System.String, System.String]" && TypeToCheck == varType.Dictionary_String_String) { return true; }
+            if (VarType == "System.Collections.Generic.Dictionary`2[System.String, System.Int32]" && TypeToCheck == varType.Dictionary_String_Int) { return true; }
+            if (VarType == "System.Collections.Generic.Dictionary`2[System.Int32, System.Int32]" && TypeToCheck == varType.Dictionary_Int_Int) { return true; }
+            if (VarType == "System.Collections.Generic.Dictionary`2[System.Int32, System.String]" && TypeToCheck == varType.Dictionary_Int_String) { return true; }
+
+
+            if (DebugMsg) { MsgBox("Need to Add: " + VarType + " to _Variables.cs in AHK.dll"); }
+            //MsgBox("Need to Add: " + VarType + " to _Variables.cs in AHK.dll");
+
+            //if (DisplayVarType) { MsgBox(VarType); }
+
+            return false;
+        }
+
+
+            //if (VarType == "" && TypeToCheck == varType.CheckBox) { return true; }
+            //if (VarType == "" && TypeToCheck == varType.DataGridView) { return true; }
+            //if (VarType == "" && TypeToCheck == varType.ListBox) { return true; }
+            //if (VarType == "" && TypeToCheck == varType.PictureBox) { return true; }
+            //if (VarType == "" && TypeToCheck == varType.TabControl) { return true; }
+            //if (VarType == "" && TypeToCheck == varType.TabPage) { return true; }
+            //if (VarType == "System.Windows.Forms.TableLayoutPanel" && TypeToCheck == varType.TableLayoutPanel) { return true; }
+            //if (VarType == "System.Windows.Forms.TextBox" && TypeToCheck == varType.TextBox) { return true; }
+            //if (VarType == "System.Windows.Forms.ToolStripMenuItem" && TypeToCheck == varType.ToolStripMenuItem) { return true; }
+            //if (VarType == "System.Windows.Forms.TreeView" && TypeToCheck == varType.TreeView) { return true; }
+            //if (VarType == "ScintillaNET.Scintilla" && TypeToCheck == varType.Scintilla) { return true; }
+
+        /// <summary>
+        /// Known Variable Types to Use with IsVarType
+        /// </summary>
+        public enum varType
+        {
+            /// <summary>
+            /// System.String
+            /// </summary>
+            String,
+            /// <summary>
+            /// System.Int32
+            /// </summary>
+            Int32,
+            /// <summary>
+            /// System.Int64
+            /// </summary>
+            Int64,
+            /// <summary>
+            /// System.Long
+            /// </summary>
+            Long,
+            /// <summary>
+            /// System.Boolean
+            /// </summary>
+            Bool,
+            /// <summary>
+            /// System.Data.DataTable
+            /// </summary>
+            DataTable,
+            /// <summary>
+            /// System.DateTime
+            /// </summary>
+            DateTime,
+            /// <summary>
+            /// System.IntPtr
+            /// </summary>
+            IntPtr,
+            /// <summary>
+            /// System.Double
+            /// </summary>
+            Double,
+            /// <summary>
+            /// System.Collections.Generic.List`1(System.String)
+            /// </summary>
+            ListString,
+            /// <summary>
+            /// System.Collections.Generic.List`1(System.Int32)
+            /// </summary>
+            ListInt,
+            Dictionary_String_DateTime,
+            Dictionary_String_String,
+            Dictionary_Int_Int,
+            Dictionary_String_Int,
+            Dictionary_Int_String,
+
+            SqlConnection,
+
+
+            Scintilla,
+            TreeView,
+            ToolStripMenuItem,
+            /// <summary>
+            /// System.Windows.Forms.Button
+            /// </summary>
+            Button,
+            /// <summary>
+            /// System.Windows.Forms.CheckBox
+            /// </summary>
+            CheckBox,
+            /// <summary>
+            /// System.Windows.Forms.DataGridView
+            /// </summary>
+            DataGridView,
+            /// <summary>
+            /// System.Windows.Forms.ListBox
+            /// </summary>
+            ListBox,
+            /// <summary>
+            /// System.Windows.Forms.PictureBox
+            /// </summary>
+            PictureBox,
+            /// <summary>
+            /// System.Windows.Forms.TabControl
+            /// </summary>
+            TabControl,
+            /// <summary>
+            /// System.Windows.Forms.TabPage
+            /// </summary>
+            TabPage,
+            /// <summary>
+            /// System.Windows.Forms.TableLayoutPanel
+            /// </summary>
+            TableLayoutPanel,
+            /// <summary>
+            /// System.Windows.Forms.TextBox
+            /// </summary>
+            TextBox,
+
+            /// <summary>
+            /// Telerik.WinControls.UI.RadPanel
+            /// </summary>
+            RadPanel,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadProgressBar
+            /// </summary>
+            RadProgressBar,
+            /// <summary>
+            /// Telerik.WinControls.UI.CommandBarSeparator
+            /// </summary>
+            CommandBarSeparator,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadRibbonBar
+            /// </summary>
+            RadRibbonBar,
+            /// <summary>
+            /// Telerik.WinControls.UI.RibbonTab
+            /// </summary>
+            RibbonTab,
+            /// <summary>
+            /// Telerik.WinControls.UI.Docking.RadDock
+            /// </summary>
+            RadDock,
+            /// <summary>
+            /// Telerik.WinControls.UI.Docking.DocumentContainer
+            /// </summary>
+            DocumentContainer,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadGalleryItem
+            /// </summary>
+            RadGalleryItem,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadTextBoxElement
+            /// </summary>
+            RadTextBoxElement,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadRibbonBarButtonGroup
+            /// </summary>
+            RadRibbonBarButtonGroup,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadDropDownButtonElement
+            /// </summary>
+            RadDropDownButtonElement,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadButtonElement
+            /// </summary>
+            RadButtonElement,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadRibbonBarGroup
+            /// </summary>
+            RadRibbonBarGroup,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadTextBox
+            /// </summary>
+            RadTextBox,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadGridView
+            /// </summary>
+            RadGridView,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadTreeView
+            /// </summary>
+            RadTreeView,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadMenu
+            /// </summary>
+            RadMenu,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadMenuItem
+            /// </summary>
+            RadMenuItem,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadNode
+            /// </summary>
+            RadNode,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadStatusStrip
+            /// </summary>
+            RadStatusStrip,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadLabelElement
+            /// </summary>
+            RadLabelElement,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadLabel
+            /// </summary>
+            RadLabel,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadMultiColumnComboBox
+            /// </summary>
+            RadMultiColumnComboBox,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadSplitContainer
+            /// </summary>
+            RadSplitContainer,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadButton
+            /// </summary>
+            RadButton,
+            /// <summary>
+            /// Telerik.WinControls.UI.SplitPanel
+            /// </summary>
+            SplitPanel,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadDropDownButton
+            /// </summary>
+            RadDropDownButton,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadPageView
+            /// </summary>
+            RadPageView,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadPageViewPage
+            /// </summary>
+            RadPageViewPage,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadAutoCompleteBox
+            /// </summary>
+            RadAutoCompleteBox,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadDateTimePicker
+            /// </summary>
+            RadDateTimePicker,
+            /// <summary>
+            /// Telerik.WinControls.UI.CommandBarRowElement
+            /// </summary>
+            CommandBarRowElement,
+            /// <summary>
+            /// Telerik.WinControls.UI.CommandBarStripElement
+            /// </summary>
+            CommandBarStripElement,
+            /// <summary>
+            /// Telerik.WinControls.UI.CommandBarToggleButton
+            /// </summary>
+            CommandBarToggleButton,
+            /// <summary>
+            /// Telerik.WinControls.UI.CommandBarButton
+            /// </summary>
+            CommandBarButton
+
+        }
+
 
         #endregion
 
@@ -434,13 +800,23 @@ namespace sharpAHK
         /// </summary>
         /// <param name="openDir">Option to Open AppDir Folder (Default = False)</param>
         /// <returns>Returns path to current application's exe</returns>
-        public string AppDir(bool openDir = false)  // returns the application directory for the application currently executing
+        public string AppDir(bool openDir = false)
         {
             string dir = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
 
             if (openDir) { OpenDir(dir); }
 
             return dir;
+        }
+
+        /// <summary>
+        /// Returns the Drive Letter the Current Application Is Running on 
+        /// </summary>
+        /// <returns></returns>
+        public string AppDriveLetter()
+        {
+            string driveLetter = StringSplit(Application.ExecutablePath, ":", 0);
+            return driveLetter;
         }
 
         /// <summary>Returns the app name from the assembly info of application running</summary>

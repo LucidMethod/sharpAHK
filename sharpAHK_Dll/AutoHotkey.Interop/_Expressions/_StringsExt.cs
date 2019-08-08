@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AHKExpressions
@@ -22,6 +23,16 @@ namespace AHKExpressions
         {
             _AHK ahk = new _AHK();
             return ahk.WordCount(Text);
+        }
+
+        /// <summary>
+        /// Replaces Invalid SQL Characters in Insert/Update Statements
+        /// </summary>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static string SQL(this string Text)
+        {
+            return Text.Replace("'", "''");
         }
 
         /// <summary>Transforms a YYYYMMDDHH24MISS timestamp into the specified date/time format.</summary>
@@ -473,6 +484,26 @@ namespace AHKExpressions
         }
 
 
+        /// <summary>Encrypt String Using passPhrase to Decrypt</summary>
+        /// <param name="plainText">String to Encrypt</param>
+        /// <param name="passPhrase">Password to Decrypt Later</param>
+        public static string Encrypt(this string plainText, string passPhrase)
+        {
+            if (plainText == null) { return ""; }
+            _AHK ahk = new _AHK();
+            return ahk.Encrypt(plainText, passPhrase);
+        }
+
+        /// <summary>Decrypts an Encrypted String using passphrase</summary>
+        /// <param name="cipherText">Encryptd String to Decrypt</param>
+        /// <param name="passPhrase">Password to Decrypt</param>
+        public static string Decrypt(this string cipherText, string passPhrase)
+        {
+            if (cipherText == null) { return ""; }
+            _AHK ahk = new _AHK();
+            return ahk.Decrypt(cipherText, passPhrase);
+        }
+
 
         /// <summary>
         /// Parses IMDb URL for IMDb Title ID
@@ -490,7 +521,87 @@ namespace AHKExpressions
             return ID;
         }
 
+        /// <summary>
+        /// Replace Text in String (Not Case Sensitive)
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
+        public static string ReplaceInsensitive(this string str, string from, string to)
+        {
+            str = Regex.Replace(str, from, to, RegexOptions.IgnoreCase);
+            return str;
+        }
 
+        /// <summary>Converts text from a text file to list <string>
+        /// <param name="TextString">Text String To Parse By New Line Into List Return</param>
+        /// <param name="SkipBlankLines">Option To Skip Blank Lines in List Return</param>
+        /// <param name="Trim">Option To Trim Each Line</param>
+        /// <param name="SkipCommentLines">Skip Lines Starting with '//' (For Excluding C# Comments)</param>
+        public static List<string> ToList(this string TextString, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
+        {
+            _AHK ahk = new _AHK();
+            List<string> list = new List<string>();
+
+            if (TextString == null) { return list; }
+
+            // parse by new line
+            {
+                // Creates new StringReader instance from System.IO
+                using (StringReader reader = new StringReader(TextString))
+                {
+                    // Loop over the lines in the string.
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (SkipCommentLines)
+                        {
+                            string First2 = ahk.FirstCharacters(line, 2); // skip over lines if they are comments
+                            if (First2 == @"//") { continue; }
+                        }
+
+                        string writeline = line;
+
+                        if (Trim) { writeline = line.Trim(); } // trim leading spaces
+
+                        if (SkipBlankLines) { if (writeline == "") { continue; } }
+
+                        list.Add(writeline);
+                    }
+                }
+
+            }
+            return list;
+        }
+
+
+        #region === ObjectStrings ===
+
+        /// <summary>
+        /// Used for Object Strings Separated by '|' - this temporarily replaces with temp char to void parsing errors
+        /// </summary>
+        /// <param name="Text">Text Potentially Containing '|' to Replace</param>
+        /// <returns></returns>
+        public static string ObjStringFix(this string Text)
+        {
+            _AHK ahk = new _AHK();
+            return ahk.ObjStringFix(Text);
+        }
+
+        /// <summary>
+        /// Restores Object String Value, Adding back Replaced Temp Character
+        /// </summary>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static string ObjStringRestore(this string Text)
+        {
+            _AHK ahk = new _AHK();
+            return ahk.ObjStringRestore(Text);
+        }
+
+
+        #endregion
 
     }
 }

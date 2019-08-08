@@ -346,7 +346,14 @@ namespace sharpAHK
         /// <returns>Returns Button Text User Clicked or 'TimeOut' if User Didn't Click Before TimeOut Reached</returns>
         public string MsgBox(object Text, string Title = "MsgBox Display", MsgBoxButtons Button = MsgBoxButtons.OK, MsgBoxIcon Icon = MsgBoxIcon.None, int TimeOut = -1)
         {
-            MessageBox.Show(Text.ToString());
+            try
+            {
+                MessageBox.Show(Text.ToString());
+            }
+            catch
+            {
+                MessageBox.Show("MessageBox Error.. My Bad");
+            }
             return "";
 
             // add option values together
@@ -431,6 +438,21 @@ namespace sharpAHK
             DialogResult result = MessageBox.Show(Question, Title, MessageBoxButtons.YesNo);
             return result;
         }
+
+        /// <summary>
+        /// Yes/No Dialog that Returns TRUE if Yes Clicked
+        /// </summary>
+        /// <param name="Question"></param>
+        /// <param name="Title"></param>
+        /// <returns></returns>
+        public bool YesNo(string Question, string Title = "PROMPT")
+        {
+            DialogResult result = YesNoBox(Question, Title);
+            if (result.ToString().ToUpper() == "NO") { return false; }
+            return true;
+        }
+
+
 
         /// <summary>yes/no/cancel prompt for user input</summary>
         /// <param name="Question"> </param>
