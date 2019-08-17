@@ -1,16 +1,17 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>C:\_Code\radProjects\radDLLs\sharpAHK\sharpAHK_Dll\AutoHotkey.Interop\sharpAHK.csproj</id>
+    <id>sharpAHK</id>
 	<authors>LucidMethod</authors>
-    <version>1.0.0.4</version>
+    <version>1.0.0.5</version>
     <owners>LucidMethod</owners>
-    <licenseUrl></licenseUrl>
-    <projectUrl></projectUrl>
-    <iconUrl></iconUrl>
+    <licenseUrl>https://github.com/LucidMethod</licenseUrl>
+	<license type="file">LICENSE</license>
+    <projectUrl>https://github.com/LucidMethod</projectUrl>
+    <iconUrl>https://github.com/LucidMethod/icon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>AutoHotkey for C#</description>
-    <releaseNotes>SharpAHK V1 Release</releaseNotes>
+    <releaseNotes>SharpAHK Release</releaseNotes>
     <copyright>Copyright 2019</copyright>
     <tags>sharpAHK AutoHotkey</tags>
     <dependencies>

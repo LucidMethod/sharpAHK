@@ -1136,6 +1136,47 @@ namespace AHKExpressions
 
         #endregion
 
+        #region === List: Convert ===
+
+        /// <summary>
+        /// Convert List to DataTable
+        /// </summary>
+        /// <param name="dv"></param>
+        /// <param name="list"></param>
+        /// <param name="ListName"></param>
+        /// <param name="AddCheckBox"></param>
+        public static DataTable ToDT(this List<string> list, string ListHeader = "ListView", bool AddCheckBox = false, string CheckBoxHeader = "Selected")
+        {
+            //======= Create DataTable and Assign to DataGrid  =======
+            DataTable dt = new DataTable();
+
+            if (!AddCheckBox)
+            {
+                dt.Columns.Add(ListHeader, typeof(String));                     // Create Columns
+
+                foreach (string item in list)
+                {
+                    dt.Rows.Add(new object[] { item });
+                }
+            }
+
+            if (AddCheckBox)  // option to add checkboxes to first column of datagridview
+            {
+                dt.Columns.Add(CheckBoxHeader, typeof(bool));
+                dt.Columns.Add(ListHeader, typeof(String));
+
+                foreach (string item in list)
+                {
+                    dt.Rows.Add(new object[] { false, item });
+                }
+            }
+
+            return dt;
+        }
+
+
+        #endregion
+
 
         // === Dictionary ===
 

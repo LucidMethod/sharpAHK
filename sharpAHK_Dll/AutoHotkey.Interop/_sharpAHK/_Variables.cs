@@ -490,6 +490,7 @@ namespace sharpAHK
             if (VarType == "Telerik.WinControls.UI.RadRibbonBarGroup" && TypeToCheck == varType.RadRibbonBarGroup) { return true; }
             if (VarType == "Telerik.WinControls.UI.RadTextBoxElement" && TypeToCheck == varType.RadTextBoxElement) { return true; }
             if (VarType == "Telerik.WinControls.UI.RadButtonElement" && TypeToCheck == varType.RadButtonElement) { return true; }
+            if (VarType == "Telerik.WinControls.UI.RadRadioButton" && TypeToCheck == varType.RadRadioButton) { return true; }
             if (VarType == "Telerik.WinControls.UI.RadDropDownButtonElement" && TypeToCheck == varType.RadDropDownButtonElement) { return true; }
             if (VarType == "Telerik.WinControls.UI.RadGalleryItem" && TypeToCheck == varType.RadGalleryItem) { return true; }
             if (VarType == "Telerik.WinControls.UI.RibbonTab" && TypeToCheck == varType.RibbonTab) { return true; }
@@ -682,6 +683,10 @@ namespace sharpAHK
             /// Telerik.WinControls.UI.RadTextBoxElement
             /// </summary>
             RadTextBoxElement,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadRadioButton
+            /// </summary>
+            RadRadioButton,
             /// <summary>
             /// Telerik.WinControls.UI.RadRibbonBarButtonGroup
             /// </summary>

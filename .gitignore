@@ -111,6 +111,9 @@ ipch/
 # TFS 2012 Local Workspace
 $tf/
 
+*/Debug/*.*
+*.licx
+
 # Guidance Automation Toolkit
 *.gpState
 
