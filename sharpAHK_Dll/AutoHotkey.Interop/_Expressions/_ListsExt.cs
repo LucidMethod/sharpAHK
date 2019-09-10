@@ -354,6 +354,7 @@ namespace AHKExpressions
             return lastItem;
         }
 
+
         /// <summary>Return list split by SplitChar (ex: ",") as new string</summary>
         /// <param name="LIST">List to convert to string</param>
         /// <param name="SplitChar">Character to place between list items in string return</param>
