@@ -16,7 +16,7 @@ using System.Windows.Forms;
 
 namespace sharpAHK
 {
-    public partial class _AHK
+    public partial class _AHK 
     {
 
         #region === Backup ===
