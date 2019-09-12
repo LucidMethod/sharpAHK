@@ -81,6 +81,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DOCUMENTATION.cs" />
     <Compile Include="Util\AhkEscape.cs" />
     <Compile Include="Util\AutoHotkeyDll.cs" />
     <Compile Include="Util\AutoHotkeyEngine.cs" />

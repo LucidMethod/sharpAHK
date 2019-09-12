@@ -465,17 +465,6 @@ namespace sharpAHK
             return sInfo;
         }
 
-        /// <summary>Object contains return values from FileGetShortcut command</summary>
-        public struct shortCutInfo
-        {
-            public string Target { get; set; }
-            public string Dir { get; set; }
-            public string Args { get; set; }
-            public string Description { get; set; }
-            public string Icon { get; set; }
-            public string IconNum { get; set; }
-            public string RunState { get; set; }
-        }
 
         /// <summary>Read File, Return File Bytes</summary>
         /// <param name="filePath">Path to file to convert to bytes</param>    
@@ -519,76 +508,6 @@ namespace sharpAHK
         //}
 
 
-        /// <summary>
-        /// Returns Directory size in Formatted Bytes FileSize Text
-        /// </summary>
-        /// <param name="DirPath">Path of Directory to Return Size</param>
-        /// <param name="FormatBytes">Option to Convert Return Value from Bytes to Formated. Ex: 4MB</param>
-        /// <param name="Recursive">Option to Search SubDirs for Total Folder Size</param>
-        /// <returns></returns>
-        public string DirSize(string DirPath, bool FormatBytes = true, bool Recursive = true)
-        {
-            if (!Directory.Exists(DirPath)) { return ""; }
-
-            // 1.
-            // Get array of all file names.
-            string[] a = Directory.GetFiles(DirPath, "*.*", System.IO.SearchOption.TopDirectoryOnly);
-            if (Recursive) { a = Directory.GetFiles(DirPath, "*.*", System.IO.SearchOption.AllDirectories); }
-
-            // 2.
-            // Calculate total bytes of all files in a loop.
-            long b = 0;
-            foreach (string name in a)
-            {
-                // 3.
-                // Use FileInfo to get length of each file.
-                FileInfo info = new FileInfo(name);
-                b += info.Length;
-            }
-
-            string size = b.ToString();
-
-            if (FormatBytes)
-            {
-                _AHK ahk = new _AHK();
-                string sizeF = ahk.FormatBytes(b);
-                return sizeF;
-            }
-            return b.ToString();
-        }
-
-
-        /// <summary>
-        /// Returns List of Folders with FolderSize 
-        /// </summary>
-        /// <param name="RootDir"></param>
-        /// <param name="FormatBytes"></param>
-        /// <param name="Recursive"></param>
-        /// <param name="OutFile"></param>
-        /// <returns></returns>
-        public string DirSizeReport(string RootDir, bool FormatBytes = true, bool Recursive = false, string OutFile = "")
-        {
-            string Out = "DIRSIZE REPORT\n\r\n\r";
-
-            List<string> dirs = DirList(RootDir, "*.*", Recursive, true);
-
-            foreach(string dir in dirs)
-            {
-                string size = DirSize(dir, FormatBytes, true);
-                Out = Out + "\n" + dir + " (" + size + ")\n\r";
-            }
-
-            if (OutFile != "")
-            {
-                FileDelete(OutFile);
-                FileAppend(Out, OutFile);
-                Run(OutFile);
-            }
-
-            return Out;
-        }
-
-
         /// <summary>Retrieves the datetime stamp of a file or folder.</summary>
         /// <param name="Filename">The name of the target file, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
         /// <param name="WhichTime">Which timestamp to retrieve: M = Modification time (default if omitted) | C = Creation time | A = Last access time   </param>        
@@ -610,8 +529,6 @@ namespace sharpAHK
             string OutVar = Execute(AHKLine, "OutputVar");   // execute AHK code and return variable value 
             return OutVar;
         }
-
-        //FileInstall - Skipped
 
         /// <summary>Moves or renames one or more files.</summary>
         /// <param name="SourcePattern">The name of a single file or a wildcard pattern such as C:\Temp\*.tmp. SourcePattern is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
@@ -708,26 +625,6 @@ namespace sharpAHK
         }
 
         /// <summary>
-        /// Rename Folder Path
-        /// </summary>
-        /// <param name="SourceDir"></param>
-        /// <param name="DestDir"></param>
-        /// <returns></returns>
-        public bool DirRename(string SourceDir, string DestDir)
-        {
-            try
-            {
-                Directory.Move(SourceDir, DestDir);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Moves all files in subfolders to the RootDirPath, removes empty folders
         /// </summary>
         /// <param name="RootDirPath">Top Folder Containing Subfolders to Move All Files Into</param>
@@ -745,57 +642,6 @@ namespace sharpAHK
 
             RemoveEmptyDirs(RootDirPath);
         }
-
-        /// <summary>
-        /// Loops through RootDirPath and Removes SubFolders that don't contain any files
-        /// </summary>
-        /// <param name="RootDirPath"></param>
-        /// <returns></returns>
-        public int RemoveEmptyDirs(string RootDirPath)
-        {
-            int removed = 0;
-
-            List<string> dirs = DirList(RootDirPath, "*.*", true, true);
-            if (dirs != null && dirs.Count > 0)
-            {
-                foreach (string dir in dirs)
-                {
-                    List<string> files = FileList(dir, "*.*", false);
-                    if (files != null)
-                    {
-                        if (files.Count == 0) { FileRemoveDir(dir, true); removed++; }
-                    }
-                }
-            }
-
-            dirs = DirList(RootDirPath, "*.*", true, true);
-            if (dirs != null && dirs.Count == 0)
-            {
-                List<string> files = FileList(RootDirPath, "*.*", true, false, true);
-                if (files != null && files.Count == 0)
-                {
-                    FileRemoveDir(RootDirPath); removed++;
-                }
-            }
-
-            return removed;
-        }
-
-
-        /// <summary>
-        /// Searches Directory for Specific File Format, Returns True if Located in Dir
-        /// </summary>
-        /// <param name="RootDirPath">Directory to Search</param>
-        /// <param name="Format">File Format To Search For (ex: *.txt)</param>
-        /// <returns></returns>
-        public bool DirContainsFormat(string RootDirPath, string Format = "*.rar")
-        {
-            if (!Directory.Exists(RootDirPath)) { return false; }
-            List<string> files = FileList(RootDirPath, Format, true);
-            if (files.Count > 0) { return true; }
-            return false;
-        }
-
 
         /// <summary>
         /// Loop through file pattern, return matches as list of full file paths
@@ -1123,7 +969,6 @@ namespace sharpAHK
 
         }
 
-
         /// <summary>Changes the script's current working directory.</summary>
         /// <param name="DirName">The name of the new working directory, which is assumed to be a subfolder of the current %A_WorkingDir% if an absolute path isn't specified.</param>
         public bool SetWorkingDir(string DirName)
@@ -1300,97 +1145,6 @@ namespace sharpAHK
             }
         }
 
-        /// <summary>Returns File's Parent Directory Path</summary>
-        /// <param name="FilePath">File Location to Parse</param>
-        /// <param name="CheckIfExists">Option to check to see if FilePath exists - FileDir returns blank if file not found</param>
-        public string FileDir(string FilePath, bool CheckIfExists = false)  // 
-        {
-            if (FilePath == null || FilePath.Trim() == "") { return ""; }  // don't check if blank value passed in
-
-            if (CheckIfExists)
-            {
-                if (File.Exists(FilePath))
-                {
-                    try
-                    {
-                        System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
-                        return fileinfo.Directory.ToString();
-                    }
-                    catch
-                    { }
-
-                }
-                return "";
-            }
-            else
-            {
-                try
-                {
-                    System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
-                    return fileinfo.Directory.ToString();
-                }
-                catch
-                {
-                    return "";
-                }
-            }
-        }
-
-        /// <summary>Returns File's Parent Directory Name from Full File Path</summary>
-        /// <param name="FilePath">File Location to Parse</param>
-        /// <param name="CheckIfExists">Option to check to see if FilePath exists - FileDir returns blank if file not found</param>
-        public string DirName(string FilePath, bool CheckIfExists = false)
-        {
-            if (FilePath == null || FilePath.Trim() == "") { return ""; }  // don't check if blank value passed in
-
-            if (CheckIfExists)
-            {
-                // if filePath is a directory, just return that dir name
-                if (IsDir(FilePath))
-                {
-                    string DirName = "";
-                    string[] words = FilePath.Split('\\');
-                    foreach (string word in words) { DirName = word; }
-                    return DirName;
-                }
-
-                if (File.Exists(FilePath))
-                {
-                    System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
-                    string s = fileinfo.DirectoryName.ToString();
-                    string DirName = "";
-                    string[] words = s.Split('\\');
-                    foreach (string word in words) { DirName = word; }
-                    return DirName;
-                }
-                return "";
-            }
-            else
-            {
-
-                // if filePath is a directory, just return that dir name
-                if (IsDir(FilePath))
-                {
-                    string DirName = "";
-                    string[] words = FilePath.Split('\\');
-                    foreach (string word in words) { DirName = word; }
-                    return DirName;
-                }
-                else
-                {
-                    System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
-                    string DirName = "";
-                    if (fileinfo.DirectoryName != null)
-                    {
-                        string s = fileinfo.DirectoryName.ToString();
-                        string[] words = s.Split('\\');
-                        foreach (string word in words) { DirName = word; }
-                    }
-                    return DirName;
-                }
-            }
-        }
-
 
         /// <summary>
         /// Returns File's Last Modified Date 
@@ -1443,6 +1197,37 @@ namespace sharpAHK
             }
 
         }
+
+        /// <summary>
+        /// Removes Decimal Values from File Size Names (ex: 3.04 MB = 3 MB)
+        /// </summary>
+        /// <param name="filesize"></param>
+        /// <returns></returns>
+        public string FileSizeTrim(string filesize)
+        {
+            string size = "";
+            if (filesize.ToUpper().Contains("KB"))
+            {
+                size = filesize.ToUpper().Replace("KB", "").Trim();
+                if (size.Contains(".")) { size = StringSplit(size, ".", 0); }
+                size = size + " KB";
+            }
+            if (filesize.ToUpper().Contains("MB"))
+            {
+                size = filesize.ToUpper().Replace("MB", "").Trim();
+                if (size.Contains(".")) { size = StringSplit(size, ".", 0); }
+                size = size + " MB";
+            }
+            if (filesize.ToUpper().Contains("GB"))
+            {
+                size = filesize.ToUpper().Replace("GB", "").Trim();
+                if (size.Contains(".")) { size = StringSplit(size, ".", 0); }
+                size = size + " GB";
+            }
+
+            return size;
+        }
+
 
         /// <summary>checks whether a file is Compressed</summary>
         /// <param name="filePath"> </param>
@@ -1678,174 +1463,6 @@ namespace sharpAHK
         }
 
 
-        // File Actions
-
-        /// <summary>Copies a folder along with all its sub-folders and files (similar to xcopy).</summary>
-        /// <param name="Source">Name of the source directory (with no trailing backslash), which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
-        /// <param name="Dest">Name of the destination directory (with no trailing baskslash), which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
-        /// <param name="OverWrite">Flag determines whether to overwrite files if they already exist. True = OverWrite Existing Files</param>
-        public bool FileCopyDir(string Source, string Dest, bool OverWrite = false)
-        {
-            string source = Source.Replace(",", "`,");
-            string dest = Dest.Replace(",", "`,");
-
-            // change overwrite bool to 1/0 
-            int overWrite = 0; if (OverWrite) { overWrite = 1; }
-
-            string AHKLine = "FileCopyDir, " + source + ", " + dest + ", " + overWrite;  // ahk line to execute
-            ErrorLog_Setup(true, "Error Copying " + source); // ErrorLevel Detection Enabled for this function in AHK 
-            Execute(AHKLine);   // execute AHK code and return variable value 
-
-            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
-            return false;  // error level detected - success = false
-
-            // v1 ToDo
-            /*
-                    void _FileCopyDir(string SourceDir, string DestinationDir, bool OverWrite = true)  // copy directory from one path to destination directory
-                    {
-                        DirectoryInfo diSource = new DirectoryInfo(SourceDir);
-                        DirectoryInfo diTarget = new DirectoryInfo(DestinationDir);
-
-                        _CopyAll(diSource, diTarget, OverWrite);
-                    }
-            */
-
-        }
-
-        /// <summary>Creates a directory/folder.</summary>
-        /// <param name="DirName">Name of the directory to create, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
-        public bool FileCreateDir(string DirName)
-        {
-            string dirName = DirName.Replace(",", "`,");
-            string AHKLine = "FileCreateDir, " + dirName;  // ahk line to execute
-            ErrorLog_Setup(true, "Error Creating Dir: " + dirName); // ErrorLevel Detection Enabled for this function in AHK 
-            Execute(AHKLine);   // execute AHK code and return variable value 
-
-            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
-            return false;  // error level detected - success = false
-
-            // v1 ToDo
-            /*
-                        if (!Directory.Exists(DirName))  // create DirName if it doesn't exist
-                        {
-                            Directory.CreateDirectory(DirName);
-                        }
-             */
-
-        }
-
-        /// <summary>Moves a folder along with all its sub-folders and files. It can also rename a folder.</summary>
-        /// <param name="Source">Name of the source directory (with no trailing backslash), which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
-        /// <param name="Dest">The new path and name of the directory (with no trailing baskslash), which is assumed to be in %A_WorkingDir% if an absolute path isn't specified. For example: D:\My Folder. Note: Dest is the actual path and name that the directory will have after it is moved; it is not the directory into which Source is moved (except for the known limitation mentioned below).</param>
-        /// <param name="Flag">0 (default): Do not overwrite existing files. | 1: Overwrite existing files. However, any files or subfolders inside Dest that do not have a counterpart in Source will not be deleted. | 2: The same as mode 1 above except that the limitation is absent. | R: Rename the directory rather than moving it. </param>
-        public bool FileMoveDir(string Source, string Dest, string Flag = "0")
-        {
-            string source = Source.Replace(",", "`,");
-            string dest = Dest.Replace(",", "`,");
-
-            string AHKLine = "FileMoveDir, " + source + ", " + dest + ", " + Flag;  // ahk line to execute
-            ErrorLog_Setup(true, "Error Moving Dir:" + source + " To: " + dest); // ErrorLevel Detection Enabled for this function in AHK 
-            Execute(AHKLine);   // execute AHK code and return variable value
-
-            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
-            return false;  // error level detected - success = false
-        }
-
-        /// <summary>Deletes a folder.</summary>
-        /// <param name="DirPath">Name of the directory to delete, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
-        /// <param name="Recurse">Recurse = False - Do not remove files and sub-directories contained in DirName. In this case, if DirName is not empty, no action will be taken | True = Remove all files and subdirectories.</param>
-        public bool FileRemoveDir(string DirPath, bool Recurse = false)
-        {
-            if (!Directory.Exists(DirPath)) { return true; }
-
-            string dirPath = DirPath.Replace(",", "`,");
-
-            string AHKLine = "FileRemoveDir, " + dirPath + ", " + Recurse;  // ahk line to execute
-            ErrorLog_Setup(true, "Error Removing Dir :" + dirPath); // ErrorLevel Detection Enabled for this function in AHK 
-            Execute(AHKLine);   // execute AHK code and return variable value
-
-            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
-
-            else// error level detected - success = false. retry with C# command if so
-            {
-                try
-                {
-                    Directory.Delete(DirPath, true); // true => recursive delete
-                }
-                catch
-                {
-                    return false;
-                }
-
-                return false;  
-            }
-            
-
-            // v1 ToDo
-            /*
-                    bool _FileRemoveDir(string DirName)  // remove / delete directory path
-                    {
-                        if (Directory.Exists(DirName))
-                        {
-                            try
-                            {
-                                Directory.Delete(DirName, true);
-                                return true;
-                            }
-                            catch
-                            {
-                                return false;
-                            }
-
-                        }
-
-                        return true;
-                    }
-            */
-
-        }
-
-        /// <summary>Opens Directory in Windows Explorer Window (If Found), Returns False if there is an Error / Directory Not Found</summary>
-        /// <param name="DirPath">Path to directory to open in explorer. Can also pass in FilePath to Open File's Directory</param>
-        /// <param name="CreateIfMissing">Option to Create Missing Directory instead of Returning False, Opens New Dir After Creating</param>
-        public bool OpenDir(string DirPath, bool CreateIfMissing = false)
-        {
-            if (DirPath.Trim() == "" || DirPath == null) { return false; }
-
-            if (isFile(DirPath)) { DirPath = FileDir(DirPath); }  // if file passed in, open file's directory
-
-            if (Directory.Exists(DirPath))
-            {
-                try
-                {
-                    Process.Start(DirPath);
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-            else  // directory not found on pc
-            {
-                if (CreateIfMissing)
-                {
-                    FileCreateDir(DirPath);
-                    return OpenDir(DirPath);
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>Opens Directory in Windows Explorer containing FilePath</summary>
-        /// <param name="FilePath">Path to file, extracting the folder path to open</param>
-        public bool OpenFileDir(string FilePath)
-        {
-            string dirPath = FileDir(FilePath, true);
-            return OpenDir(dirPath);
-        }
-
         // File Compare
 
         #region === File Compare / Hash ===
@@ -1948,175 +1565,7 @@ namespace sharpAHK
 
         #endregion
 
-        //====== Dir Print ==============================================
-
-        // string DirectoryFilePaths = ahk.DirPrint("C:\\CCSM", true, "c:\\OutFile.txt", "*.txt", true); 
-
-        /// <summary>
-        /// Prints List of Files in Directory to String or New Text File
-        /// </summary>
-        /// <param name="SearchDir">Directory to Loop through for File Paths</param>
-        /// <param name="OutFile">If path provided, writes contents of directory to this to new/existing text file</param> 
-        /// <param name="Recurse">Option to Search Files in Subdirectories (aka Recurse) Default = True</param>
-        /// <param name="SearchPattern">File pattern to search for</param>
-        /// <param name="OverWritePrevious">Option to overwrite previous OutFile if it exists (Default = True)</param>
-        /// <param name="OpenAfterWrite">If OutFile path provided, option to open new text file after writing (Default = True)</param>
-        /// <returns>Returns string with list of file paths under SearchDir</returns>
-        public string DirPrint(string SearchDir, string OutFile = "", bool Recurse = true, string SearchPattern = "*.*", bool OverWritePrevious = true, bool OpenAfterWrite = true)
-        {
-            FileDelete(OutFile);
-
-            string[] filelist = null;
-
-            if (!Recurse) { filelist = Directory.GetFiles(SearchDir, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); } // no recurse
-            else { filelist = Directory.GetFiles(SearchDir, SearchPattern, System.IO.SearchOption.AllDirectories); }            // recurse
-
-            if (filelist == null) { return ""; }
-
-            string outText = "";
-            foreach (string filename in filelist)
-            {
-                // Get Attributes for file.
-                FileInfo info = new FileInfo(filename);
-
-                string FullPath = info.FullName;
-                string DirName = info.DirectoryName;
-                string DateModified = info.LastWriteTime.ToString();
-                string Ext = info.Extension;
-                string FileName = info.Name;
-                string FileNameNoExt = FileName.Replace(Ext, ""); // remove file extention from file name
-
-                //string WriteLine = FullPath + " (" + DateModified + ")";
-                string WriteLine = FullPath;
-
-                if (outText != "") { outText = outText + "\n" + WriteLine; }
-                if (outText == "") { outText = WriteLine; }
-
-                FileAppend(WriteLine, OutFile);
-            }
-
-            // option to open output file after writing
-            if (OpenAfterWrite) { Run(OutFile); }
-
-            return outText;
-        }
-
-        /// <summary>Converts search directory contents to Datatable to display in DataGridView etc</summary>
-        /// <param name="SearchDir"> </param>
-        /// <param name="Recurse"> </param>
-        /// <param name="SearchPattern"> </param>
-        public DataTable GetDirectoryTable(string SearchDir, bool Recurse = true, string SearchPattern = "*.*")
-        {
-            if (!Directory.Exists(SearchDir)) { return null; }
-
-            //// Display dir files in DataGrid
-            //// Ex: 
-            //DataTable FileList = ahk.GetDirectoryTable(SearchDir, Recurse, SearchPattern);
-
-            //dataGridView2.DataSource = FileList; // populate datagrid 
-
-            //// format the datagrid results
-
-            //this.dataGridView2.Columns[0].Visible = false;  //FullPath
-            ////this.dataGridView2.Columns[1].Visible = false;  //FileName
-            //this.dataGridView2.Columns[2].Visible = false;  //DirName
-            //this.dataGridView2.Columns[3].Visible = false;  //FileNameNoExt
-            //this.dataGridView2.Columns[4].Visible = false;  //Ext
-            //this.dataGridView2.Columns[5].Visible = false;  //FileSize
-            //this.dataGridView2.Columns[6].Visible = false;  //DateModified
-
-            //this.dataGridView2.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-
-
-
-            // returns DataTable with info on files in a folder
-
-            DataTable FileTable = new DataTable();
-            FileTable.Columns.Add("FullPath", typeof(string));
-            FileTable.Columns.Add("FileName", typeof(string));
-            FileTable.Columns.Add("DirName", typeof(string));
-            FileTable.Columns.Add("FileNameNoExt", typeof(string));
-            FileTable.Columns.Add("Ext", typeof(string));
-            FileTable.Columns.Add("FileSize", typeof(long));
-            FileTable.Columns.Add("DateModified", typeof(DateTime));
-
-
-            string[] filelist = null;
-
-            if (Recurse == false)
-            {
-                filelist = Directory.GetFiles(SearchDir, SearchPattern, System.IO.SearchOption.TopDirectoryOnly);  // no recurse
-            }
-
-            if (Recurse == true)
-            {
-                filelist = Directory.GetFiles(SearchDir, SearchPattern, System.IO.SearchOption.AllDirectories);  // recurse
-            }
-
-            foreach (string filename in filelist)
-            {
-                // Get Attributes for file.
-                FileInfo info = new FileInfo(filename);
-
-                string FullPath = info.FullName;
-                string DirName = info.DirectoryName;
-                string DateModified = info.LastWriteTime.ToString();
-                string Ext = info.Extension;
-                string FileName = info.Name;
-                string FileNameNoExt = FileName.Replace(Ext, ""); // remove file extention from file name
-                long length = new System.IO.FileInfo(FullPath).Length; // file size in bytes
-
-                FileTable.Rows.Add(FullPath, FileName, DirName, FileNameNoExt, Ext, length, DateModified);
-            }
-
-            return FileTable;
-
-        }
-
-        /// <summary>Returns Directory size in bytes</summary>
-        /// <param name="DirPath">Path of Directory to Return Size</param>
-        public static long DirSizeBytes(string DirPath)
-        {
-            // 1.
-            // Get array of all file names.
-            string[] a = Directory.GetFiles(DirPath, "*.*");
-
-            // 2.
-            // Calculate total bytes of all files in a loop.
-            long b = 0;
-            foreach (string name in a)
-            {
-                // 3.
-                // Use FileInfo to get length of each file.
-                FileInfo info = new FileInfo(name);
-                b += info.Length;
-            }
-            // 4.
-            // Return total size
-            return b;
-        }
-
-        /// <summary>Returns true if path is a valid Directory Path</summary>
-        /// <param name="FolderPath"> </param>
-        public bool IsDir(string FolderPath)  // returns true if path is a directory
-        {
-            if (Directory.Exists(FolderPath))
-            {
-                // get the file attributes for file or directory
-                FileAttributes attr = File.GetAttributes(FolderPath);
-
-                //detect whether its a directory or file
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                    return true;
-                //MessageBox.Show("Its a directory");
-                else
-                    return false;
-            }
-            else
-                return false;
-            //MessageBox.Show("Its a file");
-        }
-
+        
         /// <summary>Returns the next available file name in a folder, incrementing with "File (FileNumber).ext" Format</summary>
         /// <param name="FilePath">Original File Name</param>
         /// <param name="LeadingZeroCount">Option to Add Leading Zeros to New File Name Format</param>
@@ -2168,8 +1617,6 @@ namespace sharpAHK
             if (FoundFile && !TimedOut) { return true; }
             else { return false; } // timeout reached, file not found
         }
-
-
 
 
 
@@ -2225,37 +1672,6 @@ namespace sharpAHK
             return FileList;
         }
 
-        /// <summary>
-        /// Returns List of Folders in Directory Path
-        /// </summary>
-        /// <param name="DirPath"> </param>
-        /// <param name="SearchPattern"> </param>
-        /// <param name="Recurse"> </param>
-        /// <param name="FullPathReturn">Option to return either the Full Directory Paths (true) or the Directory name list (false)</param>
-        public List<string> DirList(string DirPath, string SearchPattern = "*.*", bool Recurse = true, bool FullPathReturn = false)
-        {
-            List<string> FileList = new List<string>();
-
-            if (!Directory.Exists(DirPath)) { return null; }
-
-            string[] files = null;
-            if (Recurse) { files = Directory.GetDirectories(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); }
-            if (!Recurse) { files = Directory.GetDirectories(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); }
-
-            foreach (string file in files)  // loop through list of files and write file details to sqlite db
-            {
-                string dirName = "";
-                // parse by dashes to get dir naem from full path
-                List<string> split = StringSplit_List(file, @"\");
-                foreach (string d in split) { dirName = d; }
-
-
-                if (FullPathReturn) { FileList.Add(file); } // return full path in the list (option)
-                if (!FullPathReturn) { FileList.Add(dirName); } // return full path in the list (option)
-            }
-
-            return FileList;
-        }
 
         /// <summary>
         /// Search Returns list of (ex: .cs) Files Modified Today 
@@ -2364,5 +1780,620 @@ namespace sharpAHK
 
 
         #endregion
+
+
+        #region === Folders ===
+
+        /// <summary>
+        /// Rename Folder Path
+        /// </summary>
+        /// <param name="SourceDir"></param>
+        /// <param name="DestDir"></param>
+        /// <returns></returns>
+        public bool DirRename(string SourceDir, string DestDir)
+        {
+            try
+            {
+                Directory.Move(SourceDir, DestDir);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
+
+        /// <summary>
+        /// Loops through RootDirPath and Removes SubFolders that don't contain any files
+        /// </summary>
+        /// <param name="RootDirPath"></param>
+        /// <returns></returns>
+        public int RemoveEmptyDirs(string RootDirPath)
+        {
+            int removed = 0;
+
+            List<string> dirs = DirList(RootDirPath, "*.*", true, true);
+            if (dirs != null && dirs.Count > 0)
+            {
+                foreach (string dir in dirs)
+                {
+                    List<string> files = FileList(dir, "*.*", false);
+                    if (files != null)
+                    {
+                        if (files.Count == 0) { FileRemoveDir(dir, true); removed++; }
+                    }
+                }
+            }
+
+            dirs = DirList(RootDirPath, "*.*", true, true);
+            if (dirs != null && dirs.Count == 0)
+            {
+                List<string> files = FileList(RootDirPath, "*.*", true, false, true);
+                if (files != null && files.Count == 0)
+                {
+                    FileRemoveDir(RootDirPath); removed++;
+                }
+            }
+
+            return removed;
+        }
+
+
+        /// <summary>
+        /// Searches Directory for Specific File Format, Returns True if Located in Dir
+        /// </summary>
+        /// <param name="RootDirPath">Directory to Search</param>
+        /// <param name="Format">File Format To Search For (ex: *.txt)</param>
+        /// <returns></returns>
+        public bool DirContainsFormat(string RootDirPath, string Format = "*.rar")
+        {
+            if (!Directory.Exists(RootDirPath)) { return false; }
+            List<string> files = FileList(RootDirPath, Format, true);
+            if (files.Count > 0) { return true; }
+            return false;
+        }
+
+
+        /// <summary>Returns File's Parent Directory Path</summary>
+        /// <param name="FilePath">File Location to Parse</param>
+        /// <param name="CheckIfExists">Option to check to see if FilePath exists - FileDir returns blank if file not found</param>
+        public string FileDir(string FilePath, bool CheckIfExists = false)  // 
+        {
+            if (FilePath == null || FilePath.Trim() == "") { return ""; }  // don't check if blank value passed in
+
+            if (CheckIfExists)
+            {
+                if (File.Exists(FilePath))
+                {
+                    try
+                    {
+                        System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
+                        return fileinfo.Directory.ToString();
+                    }
+                    catch
+                    { }
+
+                }
+                return "";
+            }
+            else
+            {
+                try
+                {
+                    System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
+                    return fileinfo.Directory.ToString();
+                }
+                catch
+                {
+                    return "";
+                }
+            }
+        }
+
+        /// <summary>Returns File's Parent Directory Name from Full File Path</summary>
+        /// <param name="FilePath">File Location to Parse</param>
+        /// <param name="CheckIfExists">Option to check to see if FilePath exists - FileDir returns blank if file not found</param>
+        public string DirName(string FilePath, bool CheckIfExists = false)
+        {
+            if (FilePath == null || FilePath.Trim() == "") { return ""; }  // don't check if blank value passed in
+
+            if (CheckIfExists)
+            {
+                // if filePath is a directory, just return that dir name
+                if (IsDir(FilePath))
+                {
+                    string DirName = "";
+                    string[] words = FilePath.Split('\\');
+                    foreach (string word in words) { DirName = word; }
+                    return DirName;
+                }
+
+                if (File.Exists(FilePath))
+                {
+                    System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
+                    string s = fileinfo.DirectoryName.ToString();
+                    string DirName = "";
+                    string[] words = s.Split('\\');
+                    foreach (string word in words) { DirName = word; }
+                    return DirName;
+                }
+                return "";
+            }
+            else
+            {
+
+                // if filePath is a directory, just return that dir name
+                if (IsDir(FilePath))
+                {
+                    string DirName = "";
+                    string[] words = FilePath.Split('\\');
+                    foreach (string word in words) { DirName = word; }
+                    return DirName;
+                }
+                else
+                {
+                    System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
+                    string DirName = "";
+                    if (fileinfo.DirectoryName != null)
+                    {
+                        string s = fileinfo.DirectoryName.ToString();
+                        string[] words = s.Split('\\');
+                        foreach (string word in words) { DirName = word; }
+                    }
+                    return DirName;
+                }
+            }
+        }
+
+
+        /// <summary>Copies a folder along with all its sub-folders and files (similar to xcopy).</summary>
+        /// <param name="Source">Name of the source directory (with no trailing backslash), which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
+        /// <param name="Dest">Name of the destination directory (with no trailing baskslash), which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
+        /// <param name="OverWrite">Flag determines whether to overwrite files if they already exist. True = OverWrite Existing Files</param>
+        public bool FileCopyDir(string Source, string Dest, bool OverWrite = false)
+        {
+            string source = Source.Replace(",", "`,");
+            string dest = Dest.Replace(",", "`,");
+
+            // change overwrite bool to 1/0 
+            int overWrite = 0; if (OverWrite) { overWrite = 1; }
+
+            string AHKLine = "FileCopyDir, " + source + ", " + dest + ", " + overWrite;  // ahk line to execute
+            ErrorLog_Setup(true, "Error Copying " + source); // ErrorLevel Detection Enabled for this function in AHK 
+            Execute(AHKLine);   // execute AHK code and return variable value 
+
+            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
+            return false;  // error level detected - success = false
+
+            // v1 ToDo
+            /*
+                    void _FileCopyDir(string SourceDir, string DestinationDir, bool OverWrite = true)  // copy directory from one path to destination directory
+                    {
+                        DirectoryInfo diSource = new DirectoryInfo(SourceDir);
+                        DirectoryInfo diTarget = new DirectoryInfo(DestinationDir);
+
+                        _CopyAll(diSource, diTarget, OverWrite);
+                    }
+            */
+
+        }
+
+        /// <summary>Creates a directory/folder.</summary>
+        /// <param name="DirName">Name of the directory to create, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
+        public bool FileCreateDir(string DirName)
+        {
+            string dirName = DirName.Replace(",", "`,");
+            string AHKLine = "FileCreateDir, " + dirName;  // ahk line to execute
+            ErrorLog_Setup(true, "Error Creating Dir: " + dirName); // ErrorLevel Detection Enabled for this function in AHK 
+            Execute(AHKLine);   // execute AHK code and return variable value 
+
+            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
+            return false;  // error level detected - success = false
+
+            // v1 ToDo
+            /*
+                        if (!Directory.Exists(DirName))  // create DirName if it doesn't exist
+                        {
+                            Directory.CreateDirectory(DirName);
+                        }
+             */
+
+        }
+
+        /// <summary>Moves a folder along with all its sub-folders and files. It can also rename a folder.</summary>
+        /// <param name="Source">Name of the source directory (with no trailing backslash), which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
+        /// <param name="Dest">The new path and name of the directory (with no trailing baskslash), which is assumed to be in %A_WorkingDir% if an absolute path isn't specified. For example: D:\My Folder. Note: Dest is the actual path and name that the directory will have after it is moved; it is not the directory into which Source is moved (except for the known limitation mentioned below).</param>
+        /// <param name="Flag">0 (default): Do not overwrite existing files. | 1: Overwrite existing files. However, any files or subfolders inside Dest that do not have a counterpart in Source will not be deleted. | 2: The same as mode 1 above except that the limitation is absent. | R: Rename the directory rather than moving it. </param>
+        public bool FileMoveDir(string Source, string Dest, string Flag = "0")
+        {
+            string source = Source.Replace(",", "`,");
+            string dest = Dest.Replace(",", "`,");
+
+            string AHKLine = "FileMoveDir, " + source + ", " + dest + ", " + Flag;  // ahk line to execute
+            ErrorLog_Setup(true, "Error Moving Dir:" + source + " To: " + dest); // ErrorLevel Detection Enabled for this function in AHK 
+            Execute(AHKLine);   // execute AHK code and return variable value
+
+            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
+            return false;  // error level detected - success = false
+        }
+
+        /// <summary>Deletes a folder.</summary>
+        /// <param name="DirPath">Name of the directory to delete, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
+        /// <param name="Recurse">Recurse = False - Do not remove files and sub-directories contained in DirName. In this case, if DirName is not empty, no action will be taken | True = Remove all files and subdirectories.</param>
+        public bool FileRemoveDir(string DirPath, bool Recurse = false)
+        {
+            if (!Directory.Exists(DirPath)) { return true; }
+
+            string dirPath = DirPath.Replace(",", "`,");
+
+            string AHKLine = "FileRemoveDir, " + dirPath + ", " + Recurse;  // ahk line to execute
+            ErrorLog_Setup(true, "Error Removing Dir :" + dirPath); // ErrorLevel Detection Enabled for this function in AHK 
+            Execute(AHKLine);   // execute AHK code and return variable value
+
+            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
+
+            else// error level detected - success = false. retry with C# command if so
+            {
+                try
+                {
+                    Directory.Delete(DirPath, true); // true => recursive delete
+                }
+                catch
+                {
+                    return false;
+                }
+
+                return false;
+            }
+
+
+            // v1 ToDo
+            /*
+                    bool _FileRemoveDir(string DirName)  // remove / delete directory path
+                    {
+                        if (Directory.Exists(DirName))
+                        {
+                            try
+                            {
+                                Directory.Delete(DirName, true);
+                                return true;
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+
+                        }
+
+                        return true;
+                    }
+            */
+
+        }
+
+        /// <summary>Opens Directory in Windows Explorer Window (If Found), Returns False if there is an Error / Directory Not Found</summary>
+        /// <param name="DirPath">Path to directory to open in explorer. Can also pass in FilePath to Open File's Directory</param>
+        /// <param name="CreateIfMissing">Option to Create Missing Directory instead of Returning False, Opens New Dir After Creating</param>
+        public bool OpenDir(string DirPath, bool CreateIfMissing = false)
+        {
+            if (DirPath.Trim() == "" || DirPath == null) { return false; }
+
+            if (isFile(DirPath)) { DirPath = FileDir(DirPath); }  // if file passed in, open file's directory
+
+            if (Directory.Exists(DirPath))
+            {
+                try
+                {
+                    Process.Start(DirPath);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            else  // directory not found on pc
+            {
+                if (CreateIfMissing)
+                {
+                    FileCreateDir(DirPath);
+                    return OpenDir(DirPath);
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>Opens Directory in Windows Explorer containing FilePath</summary>
+        /// <param name="FilePath">Path to file, extracting the folder path to open</param>
+        public bool OpenFileDir(string FilePath)
+        {
+            string dirPath = FileDir(FilePath, true);
+            return OpenDir(dirPath);
+        }
+
+
+
+        /// <summary>
+        /// Returns List of Folders in Directory Path
+        /// </summary>
+        /// <param name="DirPath"> </param>
+        /// <param name="SearchPattern"> </param>
+        /// <param name="Recurse"> </param>
+        /// <param name="FullPathReturn">Option to return either the Full Directory Paths (true) or the Directory name list (false)</param>
+        public List<string> DirList(string DirPath, string SearchPattern = "*.*", bool Recurse = true, bool FullPathReturn = false)
+        {
+            List<string> FileList = new List<string>();
+
+            if (!Directory.Exists(DirPath)) { return null; }
+
+            string[] files = null;
+            if (Recurse) { files = Directory.GetDirectories(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); }
+            if (!Recurse) { files = Directory.GetDirectories(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); }
+
+            foreach (string file in files)  // loop through list of files and write file details to sqlite db
+            {
+                string dirName = "";
+                // parse by dashes to get dir naem from full path
+                List<string> split = StringSplit_List(file, @"\");
+                foreach (string d in split) { dirName = d; }
+
+
+                if (FullPathReturn) { FileList.Add(file); } // return full path in the list (option)
+                if (!FullPathReturn) { FileList.Add(dirName); } // return full path in the list (option)
+            }
+
+            return FileList;
+        }
+
+
+
+        /// <summary>
+        /// Returns Directory size in Formatted Bytes FileSize Text
+        /// </summary>
+        /// <param name="DirPath">Path of Directory to Return Size</param>
+        /// <param name="FormatBytes">Option to Convert Return Value from Bytes to Formated. Ex: 4MB</param>
+        /// <param name="Recursive">Option to Search SubDirs for Total Folder Size</param>
+        /// <returns></returns>
+        public string DirSize(string DirPath, bool FormatBytes = true, bool Recursive = true)
+        {
+            if (!Directory.Exists(DirPath)) { return ""; }
+
+            // 1.
+            // Get array of all file names.
+            string[] a = Directory.GetFiles(DirPath, "*.*", System.IO.SearchOption.TopDirectoryOnly);
+            if (Recursive) { a = Directory.GetFiles(DirPath, "*.*", System.IO.SearchOption.AllDirectories); }
+
+            // 2.
+            // Calculate total bytes of all files in a loop.
+            long b = 0;
+            foreach (string name in a)
+            {
+                // 3.
+                // Use FileInfo to get length of each file.
+                FileInfo info = new FileInfo(name);
+                b += info.Length;
+            }
+
+            string size = b.ToString();
+
+            if (FormatBytes)
+            {
+                _AHK ahk = new _AHK();
+                string sizeF = ahk.FormatBytes(b);
+                return sizeF;
+            }
+            return b.ToString();
+        }
+
+
+        /// <summary>
+        /// Returns List of Folders with FolderSize 
+        /// </summary>
+        /// <param name="RootDir"></param>
+        /// <param name="FormatBytes"></param>
+        /// <param name="Recursive"></param>
+        /// <param name="OutFile"></param>
+        /// <returns></returns>
+        public string DirSizeReport(string RootDir, bool FormatBytes = true, bool Recursive = false, string OutFile = "")
+        {
+            string Out = "DIRSIZE REPORT\n\r\n\r";
+
+            List<string> dirs = DirList(RootDir, "*.*", Recursive, true);
+
+            foreach (string dir in dirs)
+            {
+                string size = DirSize(dir, FormatBytes, true);
+                Out = Out + "\n" + dir + " (" + size + ")\n\r";
+            }
+
+            if (OutFile != "")
+            {
+                FileDelete(OutFile);
+                FileAppend(Out, OutFile);
+                Run(OutFile);
+            }
+
+            return Out;
+        }
+
+
+        //====== Dir Print ==============================================
+
+        // string DirectoryFilePaths = ahk.DirPrint("C:\\CCSM", true, "c:\\OutFile.txt", "*.txt", true); 
+
+        /// <summary>
+        /// Prints List of Files in Directory to String or New Text File
+        /// </summary>
+        /// <param name="SearchDir">Directory to Loop through for File Paths</param>
+        /// <param name="OutFile">If path provided, writes contents of directory to this to new/existing text file</param> 
+        /// <param name="Recurse">Option to Search Files in Subdirectories (aka Recurse) Default = True</param>
+        /// <param name="SearchPattern">File pattern to search for</param>
+        /// <param name="OverWritePrevious">Option to overwrite previous OutFile if it exists (Default = True)</param>
+        /// <param name="OpenAfterWrite">If OutFile path provided, option to open new text file after writing (Default = True)</param>
+        /// <returns>Returns string with list of file paths under SearchDir</returns>
+        public string DirPrint(string SearchDir, string OutFile = "", bool Recurse = true, string SearchPattern = "*.*", bool OverWritePrevious = true, bool OpenAfterWrite = true)
+        {
+            FileDelete(OutFile);
+
+            string[] filelist = null;
+
+            if (!Recurse) { filelist = Directory.GetFiles(SearchDir, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); } // no recurse
+            else { filelist = Directory.GetFiles(SearchDir, SearchPattern, System.IO.SearchOption.AllDirectories); }            // recurse
+
+            if (filelist == null) { return ""; }
+
+            string outText = "";
+            foreach (string filename in filelist)
+            {
+                // Get Attributes for file.
+                FileInfo info = new FileInfo(filename);
+
+                string FullPath = info.FullName;
+                string DirName = info.DirectoryName;
+                string DateModified = info.LastWriteTime.ToString();
+                string Ext = info.Extension;
+                string FileName = info.Name;
+                string FileNameNoExt = FileName.Replace(Ext, ""); // remove file extention from file name
+
+                //string WriteLine = FullPath + " (" + DateModified + ")";
+                string WriteLine = FullPath;
+
+                if (outText != "") { outText = outText + "\n" + WriteLine; }
+                if (outText == "") { outText = WriteLine; }
+
+                FileAppend(WriteLine, OutFile);
+            }
+
+            // option to open output file after writing
+            if (OpenAfterWrite) { Run(OutFile); }
+
+            return outText;
+        }
+
+        /// <summary>Converts search directory contents to Datatable to display in DataGridView etc</summary>
+        /// <param name="SearchDir"> </param>
+        /// <param name="Recurse"> </param>
+        /// <param name="SearchPattern"> </param>
+        public DataTable GetDirectoryTable(string SearchDir, bool Recurse = true, string SearchPattern = "*.*")
+        {
+            if (!Directory.Exists(SearchDir)) { return null; }
+
+            //// Display dir files in DataGrid
+            //// Ex: 
+            //DataTable FileList = ahk.GetDirectoryTable(SearchDir, Recurse, SearchPattern);
+
+            // returns DataTable with info on files in a folder
+
+            DataTable FileTable = new DataTable();
+            FileTable.Columns.Add("FullPath", typeof(string));
+            FileTable.Columns.Add("FileName", typeof(string));
+            FileTable.Columns.Add("DirName", typeof(string));
+            FileTable.Columns.Add("FileNameNoExt", typeof(string));
+            FileTable.Columns.Add("Ext", typeof(string));
+            FileTable.Columns.Add("FileSize", typeof(long));
+            FileTable.Columns.Add("DateModified", typeof(DateTime));
+
+
+            string[] filelist = null;
+
+            if (Recurse == false)
+            {
+                filelist = Directory.GetFiles(SearchDir, SearchPattern, System.IO.SearchOption.TopDirectoryOnly);  // no recurse
+            }
+
+            if (Recurse == true)
+            {
+                filelist = Directory.GetFiles(SearchDir, SearchPattern, System.IO.SearchOption.AllDirectories);  // recurse
+            }
+
+            foreach (string filename in filelist)
+            {
+                // Get Attributes for file.
+                FileInfo info = new FileInfo(filename);
+
+                string FullPath = info.FullName;
+                string DirName = info.DirectoryName;
+                string DateModified = info.LastWriteTime.ToString();
+                string Ext = info.Extension;
+                string FileName = info.Name;
+                string FileNameNoExt = FileName.Replace(Ext, ""); // remove file extention from file name
+                long length = new System.IO.FileInfo(FullPath).Length; // file size in bytes
+
+                FileTable.Rows.Add(FullPath, FileName, DirName, FileNameNoExt, Ext, length, DateModified);
+            }
+
+            return FileTable;
+
+        }
+
+        /// <summary>Returns Directory size in bytes</summary>
+        /// <param name="DirPath">Path of Directory to Return Size</param>
+        public static long DirSizeBytes(string DirPath)
+        {
+            // 1.
+            // Get array of all file names.
+            string[] a = Directory.GetFiles(DirPath, "*.*");
+
+            // 2.
+            // Calculate total bytes of all files in a loop.
+            long b = 0;
+            foreach (string name in a)
+            {
+                // 3.
+                // Use FileInfo to get length of each file.
+                FileInfo info = new FileInfo(name);
+                b += info.Length;
+            }
+            // 4.
+            // Return total size
+            return b;
+        }
+
+        /// <summary>Returns true if path is a valid Directory Path</summary>
+        /// <param name="FolderPath"> </param>
+        public bool IsDir(string FolderPath)  // returns true if path is a directory
+        {
+            if (Directory.Exists(FolderPath))
+            {
+                // get the file attributes for file or directory
+                FileAttributes attr = File.GetAttributes(FolderPath);
+
+                //detect whether its a directory or file
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    return true;
+                //MessageBox.Show("Its a directory");
+                else
+                    return false;
+            }
+            else
+                return false;
+            //MessageBox.Show("Its a file");
+        }
+
+
+
+        #endregion
+
+
+        #region === Objects ===
+
+        /// <summary>Object contains return values from FileGetShortcut command</summary>
+        public struct shortCutInfo
+        {
+            public string Target { get; set; }
+            public string Dir { get; set; }
+            public string Args { get; set; }
+            public string Description { get; set; }
+            public string Icon { get; set; }
+            public string IconNum { get; set; }
+            public string RunState { get; set; }
+        }
+
+
+        #endregion
+
     }
 }
