@@ -1205,7 +1205,7 @@ namespace sharpAHK
         /// <returns></returns>
         public string FileSizeTrim(string filesize)
         {
-            string size = "";
+            string size = ""; 
             if (filesize.ToUpper().Contains("KB"))
             {
                 size = filesize.ToUpper().Replace("KB", "").Trim();
