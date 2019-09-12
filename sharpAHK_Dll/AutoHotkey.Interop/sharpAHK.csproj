@@ -112,6 +112,8 @@
     <Compile Include="Util\EmbededResourceHelper.cs" />
     <Compile Include="Util\ProcessorType.cs" />
     <Compile Include="_sharpAHK\AHK.cs" />
+    <Compile Include="_sharpAHK\AHKcsharp.cs" />
+    <Compile Include="_sharpAHK\AHK_Expressions.cs" />
     <Compile Include="_sharpAHK\_AutoHotkey.cs" />
     <Compile Include="_sharpAHK\_Clipboard.cs" />
     <Compile Include="_sharpAHK\_Controls.cs" />

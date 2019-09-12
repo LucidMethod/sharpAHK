@@ -1,18 +1,19 @@
-﻿using sharpAHK;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace AHKExpressions
+namespace sharpAHK
 {
-    public static partial class AHKExpressions
+    public partial class _AHK
     {
         // === Lists ===
+
 
         #region === Lists: Management ===
 
@@ -20,7 +21,7 @@ namespace AHKExpressions
         /// <param name="LIST">List of strings to search for existing value</param>
         /// <param name="ListItem">List value to check for in LIST</param>
         /// <param name="CaseSensitive">Determines whether value must match list item's case exactly before returning 'true'</param>
-        public static bool InLIST(this List<string> LIST, string ListItem, bool CaseSensitive = false)
+        public bool InLIST(List<string> LIST, string ListItem, bool CaseSensitive = false)
         {
             if (LIST == null) { return false; }
 
@@ -36,7 +37,7 @@ namespace AHKExpressions
         /// <param name="LIST">List of strings to add new distinct item to</param>
         /// <param name="AddItem">Item to add to LIST if not already in LIST</param>
         /// <param name="CaseSensitive">Determines whether AddItem value must match LIST item's case exactly before excluding as existing item. False would add "haVe" and "HAVe" as different item values.</param>
-        public static List<string> ListADD(this List<string> LIST, string AddItem, bool CaseSensitive = false)
+        public List<string> ListADD(List<string> LIST, string AddItem, bool CaseSensitive = false)
         {
             if (LIST.Count > 0)
             {
@@ -54,7 +55,7 @@ namespace AHKExpressions
         /// <param name="SearchText">Return list of items containg SearchText in list item</param>
         /// <param name="CaseSensitive">Determines list item must contain same case as SearchText before adding to return list</param>
         /// <returns>Returns original list minus excluded items list values</returns>
-        public static List<string> ListSEARCH(this List<string> LIST, string SearchText, bool CaseSensitive = false)
+        public List<string> ListSEARCH(List<string> LIST, string SearchText, bool CaseSensitive = false)
         {
             List<string> returnList = new List<string>();
 
@@ -72,7 +73,7 @@ namespace AHKExpressions
         /// <param name="RemoveItems">List of items to remove from Original List</param>
         /// <param name="CaseSensitive">Determines whether RemoveItem must match item in Original list's case before excluding from return list</param>
         /// <returns>Returns original list minus excluded items list values</returns>
-        public static List<string> ListREMOVE(this List<string> OriginalList, List<string> RemoveItems, bool CaseSensitive = false)
+        public List<string> ListREMOVE(List<string> OriginalList, List<string> RemoveItems, bool CaseSensitive = false)
         {
             List<string> returnList = new List<string>();
 
@@ -96,7 +97,7 @@ namespace AHKExpressions
         /// <param name="RemoveItem">List item to remove from existing list</param>
         /// <param name="CaseSensitive">Determines whether RemoveItem must match item in Original list's case before excluding from return list</param>
         /// <returns>Returns list with all items except RemoveItem</returns>
-        public static List<string> ListREMOVE_Item(this List<string> OriginalList, string RemoveItem, bool CaseSensitive = false)
+        public List<string> ListREMOVE_Item(List<string> OriginalList, string RemoveItem, bool CaseSensitive = false)
         {
             List<string> returnList = new List<string>();
 
@@ -117,7 +118,7 @@ namespace AHKExpressions
         /// <param name="OriginalList">List of items to search and remove items from</param>
         /// <param name="ExcludeText">Return list excluding items containing this text</param>
         /// <param name="CaseSensitive">Determines whether ExcludeText must be case sensitive match to OriginalList item before removing</param>
-        public static List<string> ListREMOVE_Containing(this List<string> OriginalList, string ExcludeText, bool CaseSensitive = false)
+        public List<string> ListREMOVE_Containing(List<string> OriginalList, string ExcludeText, bool CaseSensitive = false)
         {
             List<string> NewList = new List<string>();
 
@@ -136,7 +137,7 @@ namespace AHKExpressions
         /// <param name="ExcludeDuplicates">Option to not add items from AddList already found in MainList</param>
         /// <param name="CaseSensitive">When ExcludeDuplicates is True, determines whether AddList item must match MainList item's case before excluding from merged list</param>
         /// <returns>Returns new list merging two lists together, with the option to exclude duplicate items</returns>
-        public static List<string> ListMERGE(this List<string> MainList, List<string> AddList, bool ExcludeDuplicates = false, bool CaseSensitive = false)
+        public List<string> ListMERGE(List<string> MainList, List<string> AddList, bool ExcludeDuplicates = false, bool CaseSensitive = false)
         {
             // Merge two entire lists if not excluding duplicates
             if (!ExcludeDuplicates) { MainList.AddRange(AddList); }
@@ -154,29 +155,10 @@ namespace AHKExpressions
         }
 
 
-        /// <summary>Returns list sorted alphabetically</summary>
-        /// <param name="list">List to sort alphabetically</param>
-        public static List<string> ListSORT(this List<string> list)
-        {
-            if (list == null) { return new List<string>(); } // nothing to sort, return blank list
-
-            string[] s = list.ToArray();
-            Array.Sort(s);
-            List<string> OutList = new List<string>();
-            foreach (string t in s)
-            {
-                OutList.Add(t);
-            }
-
-            return OutList;
-        }
-
-
-
         // { Needs Testing }  - need to loop again to see if there is anything in B not found in A to add to diffList.. TODO
 
         /// <summary>Compare two lists, return values found in List A NOT Found in List B</summary>
-        public static List<string> ListDIFF(this List<string> ListA, List<string> ListB)
+        public List<string> ListDIFF(List<string> ListA, List<string> ListB)
         {
             List<string> diffList = new List<string>();
 
@@ -190,7 +172,7 @@ namespace AHKExpressions
         }
 
         // untested --- aiming for random list shuffle
-        public static List<string> List_Shuffle(this List<string> aList)
+        public List<string> List_Shuffle(List<string> aList)
         {
             System.Random _random = new System.Random();
             List<string> randomList = new List<string>();
@@ -207,34 +189,8 @@ namespace AHKExpressions
             return aList;
         }
 
-
-        /// <summary>
-        /// Returns the Same List in Reverse Order
-        /// </summary>
-        /// <param name="aList"></param>
-        /// <returns></returns>
-        public static List<string> reverse(this List<string> aList)
-        {
-            List<string> rList = new List<string>();
-            if (aList == null) { return rList; }
-            if (aList.Count < 2) { rList = aList; }
-            else
-            {
-                int i = aList.Count - 1;
-                do
-                {
-                    rList.Add(aList[i]); 
-                    i--;
-                } while (i != -1);
-            }
-
-            return rList;
-        }
-
-
-
-
         #endregion
+
 
         #region === Lists: Return From ===
 
@@ -243,7 +199,7 @@ namespace AHKExpressions
         /// <param name="SearchTerm">Term to Match in LIST, returns position of item in LIST</param>
         /// <param name="CaseSensitive">Determines whether SearchTerm must match LIST item's case exactly before considering terms a match</param>
         /// <returns>Returns int indicating where SearchTerm was located in LIST, -1 returned if SearchItem not found</returns>
-        public static int List_ItemPosition(this List<string> LIST, string SearchTerm, bool CaseSensitive = false)
+        public int List_ItemPosition(List<string> LIST, string SearchTerm, bool CaseSensitive = false)
         {
             if (LIST == null || LIST.Count == 0) { return -1; } // -1 return value means item not found in list
 
@@ -263,7 +219,7 @@ namespace AHKExpressions
         /// <param name="LIST">List to search for SearchInt value</param>
         /// <param name="SearchInt">Integer to look for in LIST of numbers, returns position of int in LIST</param>
         /// <returns>Returns int indicating where SearchInt was located in LIST, -1 returned if SearchInt not found</returns>
-        public static int List_Int_ItemPosition(this List<int> LIST, int SearchInt)
+        public int List_Int_ItemPosition(List<int> LIST, int SearchInt)
         {
             if (LIST == null || LIST.Count == 0) { return -1; } // -1 return value means item not found in list
 
@@ -281,7 +237,7 @@ namespace AHKExpressions
         /// <summary>Return value of LIST item by Position # in List</summary>
         /// <param name="LIST">List to return item value from</param>
         /// <param name="ListPosition">Item # in LIST to Return Value From</param>
-        public static string List_ItemValue(this List<string> LIST, int ListPosition)
+        public string List_ItemValue(List<string> LIST, int ListPosition)
         {
             if (LIST == null || LIST.Count == 0) { return null; } // null return if no values found in LIST
             if (LIST.Count < ListPosition) { return null; } // null return if ListPosition not found in LIST
@@ -299,7 +255,7 @@ namespace AHKExpressions
         /// <summary>return value of list<int> item by position in list</summary>
         /// <param name="List<int> list"> </param>
         /// <param name=" ListPosition"> </param>
-        public static int Return_List_ValueInt(this List<int> list, int ListPosition)
+        public int Return_List_ValueInt(List<int> list, int ListPosition)
         {
             int iIndex = 0;
             int ReturnInt = 0;
@@ -322,7 +278,7 @@ namespace AHKExpressions
         /// <summary>Returns First Item added to LIST</summary>
         /// <param name="LIST">List to return First Item Value From</param>
         /// <returns>Returns first item in LIST, Returns NULL if no items in LIST</returns>
-        public static string List_FirstItem(this List<string> LIST)
+        public string List_FirstItem(List<string> LIST)
         {
             if (LIST == null || LIST.Count == 0) { return null; } // null return if no values found in LIST
 
@@ -333,7 +289,7 @@ namespace AHKExpressions
 
         /// <summary>returns last item added to list</summary>
         /// <param name="List<string> list"> </param>
-        public static string Last_List_Item(this List<string> list)
+        public string Last_List_Item(List<string> list)
         {
             string lastItem = "";
             foreach (string item in list)
@@ -346,7 +302,7 @@ namespace AHKExpressions
         /// <summary>Returns Last Item added to LIST</summary>
         /// <param name="LIST">List to return Last Item Value From</param>
         /// <returns>Returns last item in LIST, Returns NULL if no items in LIST</returns>
-        public static string List_LastItem(this List<string> LIST)
+        public string List_LastItem(List<string> LIST)
         {
             if (LIST == null || LIST.Count == 0) { return null; } // null return if no values found in LIST
 
@@ -355,11 +311,10 @@ namespace AHKExpressions
             return lastItem;
         }
 
-
         /// <summary>Return list split by SplitChar (ex: ",") as new string</summary>
         /// <param name="LIST">List to convert to string</param>
         /// <param name="SplitChar">Character to place between list items in string return</param>
-        public static string List_ToString(this List<string> LIST, string SplitChar = ",")
+        public string List_ToString(List<string> LIST, string SplitChar = ",")
         {
             if (LIST == null || LIST.Count == 0) { return ""; } // return empty string if no values found in LIST
 
@@ -371,7 +326,7 @@ namespace AHKExpressions
 
         /// <summary>return list to string, each item on new line</summary>
         /// <param name="List<string> list"> </param>
-        public static string List_ToStringLines(this List<string> LIST)
+        public string List_ToStringLines(List<string> LIST)
         {
             if (LIST == null || LIST.Count == 0) { return ""; } // return empty string if no values found in LIST
 
@@ -383,17 +338,20 @@ namespace AHKExpressions
 
         #endregion
 
+
         #region === Lists: Populate ===
 
-        /// <summary>Converts text from a text file to list <string></summary>
+        /// <summary>Converts text from a text file to string List</summary>
         /// <param name="TextString"> </param>
         /// <param name="SkipBlankLines"> </param>
         /// <param name="Trim"> </param>
         /// <param name="SkipCommentLines"> </param>
-        public static List<string> toList(this string TextString, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
+        public List<string> Text_ToList(string TextString, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
         {
             List<string> list = new List<string>();
-            _AHK ahk = new _AHK();
+
+            if (TextString == null || TextString == "") { return list; }
+
             // parse by new line
             {
                 // Creates new StringReader instance from System.IO
@@ -405,7 +363,7 @@ namespace AHKExpressions
                     {
                         if (SkipCommentLines)
                         {
-                            string First2 = ahk.FirstCharacters(line, 2);
+                            string First2 = FirstCharacters(line, 2); // skip over lines if they are comments
                             if (First2 == @"//") { continue; }
                         }
 
@@ -423,20 +381,19 @@ namespace AHKExpressions
             return list;
         }
 
-        /// <summary>Converts numbers from a text file to list <int></summary>
+        /// <summary>Converts numbers from a text file to int List</summary>
         /// <param name="TextString"> </param>
         /// <param name="SkipBlankLines"> </param>
         /// <param name="SkipCommentLines"> </param>
-        public static List<int> ToListInt(this int INT, bool SkipBlankLines = true, bool SkipCommentLines = true)
+        public List<int> Text_ToListInt(string TextString, bool SkipBlankLines = true, bool SkipCommentLines = true)
         {
             List<int> list = new List<int>();
             bool Trim = true;
-            _AHK ahk = new _AHK();
 
             // parse by new line
             {
                 // Creates new StringReader instance from System.IO
-                using (StringReader reader = new StringReader(INT.ToString()))
+                using (StringReader reader = new StringReader(TextString))
                 {
                     // Loop over the lines in the string.
                     string line;
@@ -444,7 +401,7 @@ namespace AHKExpressions
                     {
                         if (SkipCommentLines)
                         {
-                            string First2 = ahk.FirstCharacters(line, 2); // skip over lines if they are comments
+                            string First2 = FirstCharacters(line, 2); // skip over lines if they are comments
                             if (First2 == @"//") { continue; }
                         }
 
@@ -454,7 +411,7 @@ namespace AHKExpressions
 
                         if (SkipBlankLines) { if (writeline == "") { continue; } }
 
-                        int WriteInt = ahk.ToInt(writeline);   // convert string from text to int
+                        int WriteInt = ToInt(writeline);  // convert string from text to int
 
                         list.Add(WriteInt);
                     }
@@ -464,18 +421,18 @@ namespace AHKExpressions
             return list;
         }
 
-        /// <summary>Read text file, return list <string></summary>
+        /// <summary>Read text file, return string List</summary>
         /// <param name="FilePath"> </param>
         /// <param name="SkipBlankLines"> </param>
         /// <param name="Trim"> </param>
         /// <param name="SkipCommentLines"> </param>
-        public static List<string> TextFile_ToList(this string FilePath, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
+        public List<string> TextFile_ToList(string FilePath, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
         {
-            _AHK ahk = new _AHK();
             if (File.Exists(FilePath))
             {
-                string ParseCode = ahk.FileRead(FilePath);
-                List<string> list = ParseCode.toList(SkipBlankLines, Trim, SkipCommentLines);
+                string ParseCode = FileRead(FilePath);
+
+                List<string> list = Text_ToList(ParseCode, SkipBlankLines, Trim, SkipCommentLines);
                 return list;
             }
             else
@@ -486,10 +443,9 @@ namespace AHKExpressions
 
         /// <summary>Read text file, return list <int></summary>
         /// <param name="FilePath"> </param>
-        public static List<int> TextFile_ToListInt(this string FilePath)
+        public List<int> TextFile_ToListInt(string FilePath)
         {
-            _AHK ahk = new _AHK();
-            string ListTxt = ahk.FileRead(FilePath);
+            string ListTxt = FileRead(FilePath);
             List<int> list = new List<int>();
 
             // parse by new line
@@ -497,11 +453,11 @@ namespace AHKExpressions
                 string[] lines = ListTxt.Split(Environment.NewLine.ToCharArray());
                 foreach (string line in lines)
                 {
-                    string First2 = ahk.FirstCharacters(line, 2); // skip over lines if they are comments
+                    string First2 = FirstCharacters(line, 2); // skip over lines if they are comments
                     if (First2 == @"//") { continue; }
                     string writeline = line.Trim();  // trim leading spaces
                     if (writeline == "") { continue; }
-                    int lineInt = ahk.ToInt(writeline);   // convert line to integer
+                    int lineInt = ToInt(writeline);  // convert line to integer
                     list.Add(lineInt);
                 }
             }
@@ -510,7 +466,7 @@ namespace AHKExpressions
 
         /// <summary>Convert Array[] to List</summary>
         /// <param name="arr">Array to convert to List</param>
-        public static List<string> Array_ToList(this string[] arr)
+        public List<string> Array_ToList(string[] arr)
         {
             List<string> list = new List<string>(arr); // Copy array values to List.
             return list;
@@ -518,7 +474,7 @@ namespace AHKExpressions
 
         /// <summary>Convert List to Array[]</summary>
         /// <param name="List<string> list"> </param>
-        public static string[] List_ToArray(this List<string> list)
+        public string[] List_ToArray(List<string> list)
         {
             string[] s = list.ToArray();
             return s;
@@ -527,7 +483,7 @@ namespace AHKExpressions
         /// <summary>Returns list of Dictionary Keys <string></summary>
         /// <param name="Dictionary<string"> </param>
         /// <param name=" string> dictionary"> </param>
-        public static List<string> Dict_KeyList(this Dictionary<string, string> dictionary)
+        public List<string> Dict_KeyList(Dictionary<string, string> dictionary)
         {
             // Get a List of all the Keys.
             List<string> keys = new List<string>(dictionary.Keys);
@@ -537,27 +493,26 @@ namespace AHKExpressions
         /// <summary>Returns list of Dictionary Keys <int></summary>
         /// <param name="Dictionary<int"> </param>
         /// <param name=" string> dictionary"> </param>
-        public static List<int> Dict_KeyListInt(this Dictionary<int, string> dictionary)
+        public List<int> Dict_KeyListInt(Dictionary<int, string> dictionary)
         {
             // Get a List of all the Keys.
             List<int> keys = new List<int>(dictionary.Keys);
             return keys;
         }
 
-        /// <summary>Returns list of Dictionary Values <string></summary>
+        /// <summary>Returns list of string Dictionary Values</summary>
         /// <param name="Dictionary<string"> </param>
         /// <param name=" string> dictionary"> </param>
-        public static List<string> Dict_ValueList(this Dictionary<string, string> dictionary)
+        public List<string> Dict_ValueList(Dictionary<string, string> dictionary)
         {
             // Get a List of all the values
             List<string> returnlist = new List<string>(dictionary.Values);
             return returnlist;
         }
 
-        /// <summary>Returns list of Dictionary Values <string></summary>
-        /// <param name="Dictionary<string"> </param>
-        /// <param name=" int> dictionary"> </param>
-        public static List<int> Dict_ValueListInt(this Dictionary<string, int> dictionary)
+        /// <summary>Returns list of string Dictionary Values</summary>
+        /// <param name="Dictionary"> </param>
+        public List<int> Dict_ValueListInt(Dictionary<string, int> dictionary)
         {
             // Get a List of all the values
             List<int> returnlist = new List<int>(dictionary.Values);
@@ -572,7 +527,7 @@ namespace AHKExpressions
 
         /// <summary>Returns List<string> of Image File Paths in Directory Path (JPG, JPEG, GIF, ICO, PNG)</summary>
         /// <param name="DirPath"> </param>
-        public static List<string> DirList_Images(this string DirPath, bool Recurse = true)
+        public List<string> DirList_Images(string DirPath, bool Recurse = true)
         {
             List<string> myImageList = new List<string>();
 
@@ -618,9 +573,8 @@ namespace AHKExpressions
         /// <param name="DirPath"> </param>
         /// <param name="ExtTypes"> </param>
         /// <param name="Recurse"> </param>
-        public static List<string> FileList_SortedAlpha_ByFileName(this string DirPath, string ExtTypes = "*.*", bool Recurse = true)
+        public List<string> FileList_SortedAlpha_ByFileName(string DirPath, string ExtTypes = "*.*", bool Recurse = true)
         {
-            _AHK ahk = new _AHK();
             string[] files = Directory.GetFiles(DirPath, ExtTypes, System.IO.SearchOption.AllDirectories);
 
             if (!Recurse) { files = Directory.GetFiles(DirPath, ExtTypes, System.IO.SearchOption.TopDirectoryOnly); }
@@ -632,7 +586,7 @@ namespace AHKExpressions
             List<string> filelistSort = new List<string>();
             foreach (string fil in filelist)  // loop through list items
             {
-                filelistSort.Add(ahk.FileName(fil) + "|" + fil);
+                filelistSort.Add(FileName(fil) + "|" + fil);
             }
             filelistSort.Sort();
 
@@ -651,6 +605,49 @@ namespace AHKExpressions
             return filelistSorted;
         }
 
+
+        /// <summary>
+        /// Returns List of Files (Default sorted largest to smallest) size
+        /// </summary>
+        /// <param name="DirPath">Folder Path</param>
+        /// <param name="ExtTypes">File Extentions to Search For</param>
+        /// <param name="Descending">Largest to Smallest FileSize</param>
+        /// <param name="Recurse">Search into SubFolders</param>
+        /// <returns></returns>
+        public List<string> FileList_SortedSize(string DirPath, string ExtTypes = "*.*", bool Descending = true, bool Recurse = true)
+        {
+            List<string> files = new List<string>();
+
+            // File names.
+            string[] fns; // = Directory.GetFiles(DirPath, ExtTypes, SearchOption.AllDirectories);
+
+            if (Recurse) { fns = Directory.GetFiles(DirPath, ExtTypes, SearchOption.AllDirectories); }
+            else { fns = Directory.GetFiles(DirPath, ExtTypes, SearchOption.TopDirectoryOnly); }
+
+
+            // Order by size.
+            var sort = from fn in fns
+                       orderby new FileInfo(fn).Length descending
+                       select fn;
+
+            if (!Recurse) // option for smallest to largest
+            {
+                sort = from fn in fns
+                       orderby new FileInfo(fn).Length ascending
+                       select fn;
+            }
+
+            // List files.
+            foreach (string n in sort)
+            {
+                files.Add(n);
+            }
+
+            return files;
+        }
+
+
+
         // TODO: Finish 
 
         /// <summary>returns List<string> of files in directory path modified today</summary>
@@ -659,10 +656,9 @@ namespace AHKExpressions
         /// <param name="Recurse"> </param>
         /// <param name="FileNameOnly"> </param>
         /// <param name="IncludeExt"> </param>
-        public static List<string> FileList_Modified_Today(this string DirPath, string SearchPattern = "*.*", bool Recurse = true, bool FileNameOnly = false, bool IncludeExt = true)
+        public List<string> FileList_Modified_Today(string DirPath, string SearchPattern = "*.*", bool Recurse = true, bool FileNameOnly = false, bool IncludeExt = true)
         {
             List<string> FileList = new List<string>();
-            _AHK ahk = new _AHK();
 
             if (!Directory.Exists(DirPath)) { return null; }
 
@@ -677,8 +673,8 @@ namespace AHKExpressions
                 if (info.LastWriteTime.Date == DateTime.Today)  // if file modified today - add to list
                 {
                     string addFile = file;
-                    if (FileNameOnly) { addFile = ahk.FileName(file); }
-                    if ((FileNameOnly) && (!IncludeExt)) { addFile = ahk.FileNameNoExt(file); }
+                    if (FileNameOnly) { addFile = FileName(file); }
+                    if ((FileNameOnly) && (!IncludeExt)) { addFile = FileNameNoExt(file); }
                     FileList.Add(addFile);
                 }
 
@@ -709,10 +705,10 @@ namespace AHKExpressions
         /// <param name="Recurse"> </param>
         /// <param name="FileNameOnly"> </param>
         /// <param name="IncludeExt"> </param>
-        public static List<string> FileList_Modified_Since(this string DirPath, DateTime Since, string SearchPattern = "*.*", bool Recurse = true, bool FileNameOnly = false, bool IncludeExt = true)
+        public List<string> FileList_Modified_Since(string DirPath, DateTime Since, string SearchPattern = "*.*", bool Recurse = true, bool FileNameOnly = false, bool IncludeExt = true)
         {
             List<string> FileList = new List<string>();
-            _AHK ahk = new _AHK();
+
             if (!Directory.Exists(DirPath)) { return null; }
 
             string[] files = null;
@@ -729,8 +725,8 @@ namespace AHKExpressions
                 if (fileDate > Since)
                 {
                     string addFile = file;
-                    if (FileNameOnly) { addFile = ahk.FileName(file); }
-                    if ((FileNameOnly) && (!IncludeExt)) { addFile = ahk.FileNameNoExt(file); }
+                    if (FileNameOnly) { addFile = FileName(file); }
+                    if ((FileNameOnly) && (!IncludeExt)) { addFile = FileNameNoExt(file); }
                     FileList.Add(addFile);
                 }
 
@@ -773,7 +769,7 @@ namespace AHKExpressions
 
         ///  Drives
         /// <summary>Returns list of drive letters (C:\ etc) visible on this pc</summary>
-        public static List<string> List_Drives()
+        public List<string> List_Drives()
         {
             List<string> Drives = new List<string>();
 
@@ -787,7 +783,7 @@ namespace AHKExpressions
         ///  CSV
         /// <summary>convert list to csv formatted string</summary>
         /// <param name="List<string> list"> </param>
-        public static string List_ToCSV(this List<string> list)
+        public string List_ToCSV(List<string> list)
         {
             string returnText = "";
             foreach (string item in list)
@@ -802,7 +798,7 @@ namespace AHKExpressions
         /// <summary>convert csv to list<string></summary>
         /// <param name="CSV"> </param>
         /// <param name="ParseBy"> </param>
-        public static List<string> CSV_ToList(this string CSV, string ParseBy = ",")
+        public List<string> CSV_ToList(string CSV, string ParseBy = ",")
         {
             char myChar = ParseBy[0];
             List<string> CSV_List = new List<string>();
@@ -818,7 +814,7 @@ namespace AHKExpressions
 
         /// <summary>Returns List of Controls on a Form as a Control List</summary>
         /// <param name="FormName">WinForm to return list of Controls From</param>
-        public static List<Control> ControlList(this Control FormName)
+        public List<Control> ControlList(Control FormName)
         {
             var controlList = new List<Control>();
 
@@ -832,6 +828,92 @@ namespace AHKExpressions
         }
 
 
+        /// <summary>Returns List of ALL Processes Running on PC - If ProcessName Provided then Returns All Processes with that ProcessName</summary>
+        /// <param name="ProcessName">Optional parameter to return all processes with this process name</param>
+        public List<Process> ProcessList(string ProcessName = "")
+        {
+            List<Process> ProcessList = new List<Process>();
+
+            Process[] processlist = Process.GetProcesses();
+
+            foreach (Process theprocess in processlist)
+            {
+                if (!String.IsNullOrEmpty(theprocess.MainWindowTitle))
+                {
+                    try
+                    {
+                        //winInfo WinPositions = new winInfo();
+                        //WinPositions = WinGetPos("ahk_PID " + theprocess.MainWindowHandle);
+
+                        if (ProcessName == "") { ProcessList.Add(theprocess); }  // return all processes if Process Name not provided
+
+                        if (ProcessName != "") { if (theprocess.ProcessName == ProcessName) { ProcessList.Add(theprocess); } } // return all processes if Process Name not provided
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            return ProcessList;
+        }
+
+
+        /// <summary>Returns List of all WinTitles with ProcessName</summary>
+        /// <param name="processName">Name of process to seach for</param>
+        public List<string> WinTitles_By_ProcessName(string processName = "mpc-hc64", bool ExactMatch = true)
+        {
+            List<string> MPC_WinTitles = new List<string>();
+
+            Process[] processlist = Process.GetProcesses();
+
+            foreach (Process process in processlist)
+            {
+                if (!String.IsNullOrEmpty(process.MainWindowTitle))
+                {
+                    if (process.ProcessName.ToUpper() == processName.ToUpper())
+                    {
+                        MPC_WinTitles.Add(process.MainWindowTitle);
+                    }
+                    else if(process.ProcessName.ToUpper().Contains(processName.ToUpper()))
+                    {
+                        MPC_WinTitles.Add(process.MainWindowTitle);
+                    }
+
+                    //Console.WriteLine("Process: {0} ID: {1} Window title: {2}", process.ProcessName, process.Id, process.MainWindowTitle);
+                }
+            }
+
+            return MPC_WinTitles;
+        }
+
+
+        /// <summary>
+        /// Returns List of Alphabet (to loop). If Start Letter Provided, Will Return All Letters Starting with That One
+        /// </summary>
+        /// <param name="StartLetter"></param>
+        /// <returns></returns>
+        public List<string> Letters(string StartLetter = "")
+        {
+            List<string> lets = new List<string>() { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+
+            if (StartLetter != "")
+            {
+                List<string> Lets = new List<string>();
+                bool start = false;
+                foreach (string let in lets)
+                {
+                    if (let.ToUpper() == StartLetter.ToUpper()) { start = true; }
+                    if (start) { Lets.Add(let); }
+                }
+                return Lets;
+            }
+
+            return lets;
+        }
+
+
+        #endregion
 
 
         #region === Lists: Display  ===
@@ -846,7 +928,7 @@ namespace AHKExpressions
         /// <param name=" List<string> list"> </param>
         /// <param name="ListName"> </param>
         /// <param name="AddCheckBox"> </param>
-        public static void List_To_Grid(this DataGridView dv, List<string> list, string ListName = "List_View", bool AddCheckBox = false)
+        public void List_To_Grid(DataGridView dv, List<string> list, string ListName = "List_View", bool AddCheckBox = false)
         {
             //======= Create DataTable and Assign to DataGrid  =======
             DataTable dt = new DataTable();
@@ -881,7 +963,7 @@ namespace AHKExpressions
         /// <param name="dv"> </param>
         /// <param name=" List<int> list"> </param>
         /// <param name="ListName"> </param>
-        public static void List_To_GridInt(this DataGridView dv, List<int> list, string ListName = "List_View")
+        public void List_To_GridInt(DataGridView dv, List<int> list, string ListName = "List_View")
         {
             //======= Create DataTable and Assign to DataGrid  =======
             DataTable dt = new DataTable();
@@ -903,7 +985,7 @@ namespace AHKExpressions
         /// <param name=" List<string> LoadList"> </param>
         /// <param name="ParentName">Name of Parent Node to List Items Under - Leave Blank to Add to TreeView Root</param>
         /// <param name="cLearTV"> </param>
-        public static void List_To_TreeView(this TreeView TV, List<string> LoadList, string ParentName = "List", bool cLearTV = true)
+        public void List_To_TreeView(TreeView TV, List<string> LoadList, string ParentName = "List", bool cLearTV = true)
         {
             if (cLearTV) { TV.Nodes.Clear(); }
             TreeViewList(TV, LoadList, ParentName);
@@ -915,7 +997,7 @@ namespace AHKExpressions
         /// <param name="ParentName"> </param>
         /// <param name="NoParent"> </param>
         /// <param name="cLearTV"> </param>
-        public static void List_To_TreeViewInt(this TreeView TV, List<int> LoadList, string ParentName = "List", bool NoParent = false, bool cLearTV = true)
+        public void List_To_TreeViewInt(TreeView TV, List<int> LoadList, string ParentName = "List", bool NoParent = false, bool cLearTV = true)
         {
             if (cLearTV) { TV.Nodes.Clear(); }
 
@@ -927,7 +1009,7 @@ namespace AHKExpressions
         /// <summary>populate ComboBox from List <string></summary>
         /// <param name="ComboBox cb"> </param>
         /// <param name=" List<string> LoadList"> </param>
-        public static void List_To_ComboBox(this ComboBox cb, List<string> LoadList)
+        public void List_To_ComboBox(ComboBox cb, List<string> LoadList)
         {
             //Setup data binding
             cb.DataSource = LoadList;
@@ -938,7 +1020,7 @@ namespace AHKExpressions
         /// <summary>populate ComboBox from List <int></summary>
         /// <param name="ComboBox cb"> </param>
         /// <param name=" List<string> LoadList"> </param>
-        public static void List_To_ComboBoxInt(this ComboBox cb, List<int> LoadList)
+        public void List_To_ComboBoxInt(ComboBox cb, List<int> LoadList)
         {
             //Setup data binding
             cb.DataSource = LoadList;
@@ -950,7 +1032,7 @@ namespace AHKExpressions
         /// <param name="ListBox listbox"> </param>
         /// <param name=" List<string> LoadList"> </param>
         /// <param name="Clear"> </param>
-        public static void List_To_ListBox(this ListBox listbox, List<string> LoadList, bool Clear = true)
+        public void List_To_ListBox(ListBox listbox, List<string> LoadList, bool Clear = true)
         {
             if (Clear)  // option to clear out previous listbox values before adding
             {
@@ -966,7 +1048,7 @@ namespace AHKExpressions
         /// <summary>populate ListBox from List <int></summary>
         /// <param name="ListBox listbox"> </param>
         /// <param name=" List<int> LoadList"> </param>
-        public static void List_To_ListBoxInt(this ListBox listbox, List<int> LoadList)
+        public void List_To_ListBoxInt(ListBox listbox, List<int> LoadList)
         {
             //Setup data binding
             listbox.DataSource = LoadList;
@@ -981,7 +1063,7 @@ namespace AHKExpressions
         /// <param name="TV"> </param>
         /// <param name="LoadList"> </param>
         /// <param name="NodeParentName"> </param>
-        public static void TreeViewList(this TreeView TV, List<string> LoadList, string NodeParentName = "")
+        public void TreeViewList(TreeView TV, List<string> LoadList, string NodeParentName = "")
         {
             // if node parent name provided in parameters, use that as Node header. otherwise no header
             bool NoParent = true; if (NodeParentName.Trim() != "") { NoParent = false; }
@@ -1068,7 +1150,7 @@ namespace AHKExpressions
         /// <param name="TV"> </param>
         /// <param name="LoadList"> </param>
         /// <param name="NodeParentName"> </param>
-        public static void TreeViewList_Int(this TreeView TV, List<int> LoadList, string NodeParentName = "")
+        public void TreeViewList_Int(TreeView TV, List<int> LoadList, string NodeParentName = "")
         {
             // if node parent name provided in parameters, use that as Node header. otherwise no header
             bool NoParent = true; if (NodeParentName.Trim() != "") { NoParent = false; }
@@ -1114,217 +1196,20 @@ namespace AHKExpressions
 
         #endregion
 
-
-        #endregion
-
-        #region === Randomize ===
-        //source: https://stackoverflow.com/questions/273313/randomize-a-listt
-
-        private static Random rng = new Random();
-
-        /// <summary>
-        /// Shuffle Contents of List 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list"></param>
-        public static void Shuffle<T>(this IList<T> list)
+        public List<string> ListSORT(List<string> list)
         {
-            int n = list.Count;
-            while (n > 1)
+            if (list == null) { return new List<string>(); } // nothing to sort, return blank list
+
+            string[] s = list.ToArray();
+            Array.Sort(s);
+            List<string> OutList = new List<string>();
+            foreach (string t in s)
             {
-                n--;
-                int k = rng.Next(n + 1);
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
-        }
-
-
-        #endregion
-
-        #region === List: Convert ===
-
-        /// <summary>
-        /// Convert List to DataTable
-        /// </summary>
-        /// <param name="dv"></param>
-        /// <param name="list"></param>
-        /// <param name="ListName"></param>
-        /// <param name="AddCheckBox"></param>
-        public static DataTable ToDT(this List<string> list, string ListHeader = "ListView", bool AddCheckBox = false, string CheckBoxHeader = "Selected")
-        {
-            //======= Create DataTable and Assign to DataGrid  =======
-            DataTable dt = new DataTable();
-
-            if (!AddCheckBox)
-            {
-                dt.Columns.Add(ListHeader, typeof(String));                     // Create Columns
-
-                foreach (string item in list)
-                {
-                    dt.Rows.Add(new object[] { item });
-                }
+                OutList.Add(t);
             }
 
-            if (AddCheckBox)  // option to add checkboxes to first column of datagridview
-            {
-                dt.Columns.Add(CheckBoxHeader, typeof(bool));
-                dt.Columns.Add(ListHeader, typeof(String));
-
-                foreach (string item in list)
-                {
-                    dt.Rows.Add(new object[] { false, item });
-                }
-            }
-
-            return dt;
+            return OutList;
         }
-
-
-        #endregion
-
-
-        // === Dictionary ===
-
-        #region === Dictionary Actions ===
-
-        /// <summary>Sort Dictionary by Value</summary>
-        /// <param name="dict">Dictionary to Sort</param>
-        /// <param name="Reverse">Reverses the Alpha Sort from A-Z to Z-A</param>
-        public static Dictionary<string, string> SortByValue(this Dictionary<string, string> dict, bool Reverse = false)
-        {
-            Dictionary<string, string> returndict = new Dictionary<string, string>();
-
-            // Order by values.
-            // ... Use LINQ to specify sorting by value.
-            var items = from pair in dict
-                        orderby pair.Value ascending
-                        select pair;
-
-            if (Reverse)
-            {
-                // Reverse sort.
-                // ... Can be looped over in the same way as above.
-                items = from pair in dict
-                        orderby pair.Value descending
-                        select pair;
-            }
-
-            // Display results.
-            foreach (KeyValuePair<string, string> pair in items)
-            {
-                //Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
-
-                returndict.Add(pair.Key, pair.Value);
-            }
-
-            return returndict;
-        }
-
-
-        /// <summary>Sort Dictionary by Key</summary>
-        /// <param name="dict">Dictionary to Sort</param>
-        /// <param name="Reverse">Reverses the Alpha Sort from A-Z to Z-A</param>
-        public static Dictionary<string, string> SortByKey(this Dictionary<string, string> dict, bool Reverse = false)
-        {
-            Dictionary<string, string> returndict = new Dictionary<string, string>();
-
-            // Order by values.
-            // ... Use LINQ to specify sorting by value.
-            var items = from pair in dict
-                        orderby pair.Key ascending
-                        select pair;
-
-            if (Reverse)
-            {
-                // Reverse sort.
-                // ... Can be looped over in the same way as above.
-                items = from pair in dict
-                        orderby pair.Key descending
-                        select pair;
-            }
-
-            // Display results.
-            foreach (KeyValuePair<string, string> pair in items)
-            {
-                //Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
-
-                returndict.Add(pair.Key, pair.Value);
-            }
-
-            return returndict;
-        }
-
-
-
-        /// <summary>Converts Dictionary to DataTable</summary>
-        /// <param name="dictionary">Dictionary to Convert</param>
-        /// <param name="KeyField">DataTable Column Header for Key Column</param>
-        /// <param name="ValueField">DataTable Column Header for Value Column</param>
-        public static DataTable ToDataTable(this Dictionary<string, string> dictionary, string KeyField = "Key", string ValueField = "Value")
-        {
-            // Here we create a DataTable with four columns.
-            DataTable table = new DataTable();
-            table.Columns.Add(KeyField, typeof(string));
-            table.Columns.Add(ValueField, typeof(string));
-
-            // Use var keyword to enumerate dictionary.
-            foreach (var pair in dictionary)
-            {
-                table.Rows.Add(pair.Key, pair.Value);
-            }
-
-            return table;
-        }
-
-
-        /// <summary>
-        /// Returns Dictionary Value from Key
-        /// </summary>
-        /// <param name="Dict"></param>
-        /// <param name="KeyName"></param>
-        /// <returns></returns>
-        public static string Value(this Dictionary<string, string> Dict, string KeyName)
-        {
-            string val = "";
-
-            // See whether Dictionary contains this string.
-            if (Dict.ContainsKey(KeyName)) { val = Dict[KeyName]; }
-
-            return val;
-        }
-
-        /// <summary>Returns list<string> of Keys from Dictionary
-        /// <param name="dictionary"></param>
-        /// /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
-        public static List<string> KeyList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
-        {
-            _AHK ahk = new _AHK();
-
-            // Get a List of all the Keys.
-            List<string> keys = new List<string>(dictionary.Keys);
-
-            if (SortAlpha) { keys = ahk.ListSORT(keys); }
-
-            return keys;
-        }
-
-
-        /// <summary>Returns List of Values from Dictionary </summary>
-        /// <param name="dictionary"></param>
-        /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
-        public static List<string> ValueList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
-        {
-            _AHK ahk = new _AHK();
-            // Get a List of all the values
-            List<string> values = new List<string>(dictionary.Values);
-            //if (SortAlpha) { values =  values.ListSORT(); }
-            return values;
-        }
-
-
-        #endregion
 
 
     }
