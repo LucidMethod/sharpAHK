@@ -2380,7 +2380,7 @@ namespace sharpAHK
 
         #region === Objects ===
 
-        /// <summary>Object contains return values from FileGetShortcut command</summary>
+        /// <summary>Object contains return values from FileGetShortcut command </summary>
         public struct shortCutInfo
         {
             public string Target { get; set; }
