@@ -1205,7 +1205,7 @@ namespace sharpAHK
         /// <returns></returns>
         public string FileSizeTrim(string filesize)
         {
-            string size = "";
+            string size = ""; 
             if (filesize.ToUpper().Contains("KB"))
             {
                 size = filesize.ToUpper().Replace("KB", "").Trim();
@@ -2380,7 +2380,7 @@ namespace sharpAHK
 
         #region === Objects ===
 
-        /// <summary>Object contains return values from FileGetShortcut command</summary>
+        /// <summary>Object contains return values from FileGetShortcut command </summary>
         public struct shortCutInfo
         {
             public string Target { get; set; }
