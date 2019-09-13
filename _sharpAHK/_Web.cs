@@ -23,7 +23,7 @@ namespace sharpAHK
         /// <example>
         /// string HTML = ahk.Download_HTML("http://www.imdb.com/title/tt1985949/", "c:\\HTML.txt");
         /// </example>
-        public string Download_HTML(string URL, string SaveFile = "", string login = "", string pass = "")
+        public string Download_HTML(string URL, string SaveFile = "", string login = "", string pass = "", bool HideErrorMsg = true)
         {
             //### download a web page to a string
             WebClient client = new WebClient();
@@ -51,8 +51,11 @@ namespace sharpAHK
             }
             catch(Exception ex)
             {
-                _AHK ahk = new _AHK();
-                ahk.MsgBox(ex.ToString());
+                if (!HideErrorMsg)
+                {
+                    _AHK ahk = new _AHK();
+                    ahk.MsgBox(ex.ToString());
+                }
                 return "";
             }
 

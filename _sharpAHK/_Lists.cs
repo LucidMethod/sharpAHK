@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -812,81 +813,6 @@ namespace sharpAHK
         }
 
 
-        /// <summary>Returns List of Controls on a Form as a Control List</summary>
-        /// <param name="FormName">WinForm to return list of Controls From</param>
-        public List<Control> ControlList(Control FormName)
-        {
-            var controlList = new List<Control>();
-
-            foreach (Control childControl in FormName.Controls)
-            {
-                // Recurse child controls.
-                controlList.AddRange(ControlList(childControl));
-                controlList.Add(childControl);
-            }
-            return controlList;
-        }
-
-
-        /// <summary>Returns List of ALL Processes Running on PC - If ProcessName Provided then Returns All Processes with that ProcessName</summary>
-        /// <param name="ProcessName">Optional parameter to return all processes with this process name</param>
-        public List<Process> ProcessList(string ProcessName = "")
-        {
-            List<Process> ProcessList = new List<Process>();
-
-            Process[] processlist = Process.GetProcesses();
-
-            foreach (Process theprocess in processlist)
-            {
-                if (!String.IsNullOrEmpty(theprocess.MainWindowTitle))
-                {
-                    try
-                    {
-                        //winInfo WinPositions = new winInfo();
-                        //WinPositions = WinGetPos("ahk_PID " + theprocess.MainWindowHandle);
-
-                        if (ProcessName == "") { ProcessList.Add(theprocess); }  // return all processes if Process Name not provided
-
-                        if (ProcessName != "") { if (theprocess.ProcessName == ProcessName) { ProcessList.Add(theprocess); } } // return all processes if Process Name not provided
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-
-            return ProcessList;
-        }
-
-
-        /// <summary>Returns List of all WinTitles with ProcessName</summary>
-        /// <param name="processName">Name of process to seach for</param>
-        public List<string> WinTitles_By_ProcessName(string processName = "mpc-hc64", bool ExactMatch = true)
-        {
-            List<string> MPC_WinTitles = new List<string>();
-
-            Process[] processlist = Process.GetProcesses();
-
-            foreach (Process process in processlist)
-            {
-                if (!String.IsNullOrEmpty(process.MainWindowTitle))
-                {
-                    if (process.ProcessName.ToUpper() == processName.ToUpper())
-                    {
-                        MPC_WinTitles.Add(process.MainWindowTitle);
-                    }
-                    else if(process.ProcessName.ToUpper().Contains(processName.ToUpper()))
-                    {
-                        MPC_WinTitles.Add(process.MainWindowTitle);
-                    }
-
-                    //Console.WriteLine("Process: {0} ID: {1} Window title: {2}", process.ProcessName, process.Id, process.MainWindowTitle);
-                }
-            }
-
-            return MPC_WinTitles;
-        }
-
 
         /// <summary>
         /// Returns List of Alphabet (to loop). If Start Letter Provided, Will Return All Letters Starting with That One
@@ -910,6 +836,26 @@ namespace sharpAHK
             }
 
             return lets;
+        }
+
+
+        #endregion
+
+        #region === Processes ===
+
+        /// <summary>Returns List of Controls on a Form as a Control List</summary>
+        /// <param name="FormName">WinForm to return list of Controls From</param>
+        public List<Control> ControlList(Control FormName)
+        {
+            var controlList = new List<Control>();
+
+            foreach (Control childControl in FormName.Controls)
+            {
+                // Recurse child controls.
+                controlList.AddRange(ControlList(childControl));
+                controlList.Add(childControl);
+            }
+            return controlList;
         }
 
 
@@ -1196,7 +1142,135 @@ namespace sharpAHK
 
         #endregion
 
+        public List<string> ListSORT(List<string> list)
+        {
+            if (list == null) { return new List<string>(); } // nothing to sort, return blank list
 
+            string[] s = list.ToArray();
+            Array.Sort(s);
+            List<string> OutList = new List<string>();
+            foreach (string t in s)
+            {
+                OutList.Add(t);
+            }
+
+            return OutList;
+        }
+
+
+        #region === Processes ===
+
+        /// <summary>Returns List of all WinTitles with ProcessName</summary>
+        /// <param name="processName">Name of process to seach for</param>
+        public List<string> WinTitles_By_ProcessName(string processName = "mpc-hc64", bool ExactMatch = true)
+        {
+            List<string> MPC_WinTitles = new List<string>();
+
+            Process[] processlist = Process.GetProcesses();
+
+            foreach (Process process in processlist)
+            {
+                if (!String.IsNullOrEmpty(process.MainWindowTitle))
+                {
+                    if (process.ProcessName.ToUpper() == processName.ToUpper())
+                    {
+                        MPC_WinTitles.Add(process.MainWindowTitle);
+                    }
+                    else if (process.ProcessName.ToUpper().Contains(processName.ToUpper()))
+                    {
+                        MPC_WinTitles.Add(process.MainWindowTitle);
+                    }
+
+                    //Console.WriteLine("Process: {0} ID: {1} Window title: {2}", process.ProcessName, process.Id, process.MainWindowTitle);
+                }
+            }
+
+            return MPC_WinTitles;
+        }
+
+        /// <summary>Returns List of ALL Processes Running on PC - If ProcessName Provided then Returns All Processes with that ProcessName</summary>
+        /// <param name="ProcessName">Optional parameter to return all processes with this process name</param>
+        public List<Process> ProcessList(string ProcessName = "")
+        {
+            List<Process> ProcessList = new List<Process>();
+
+            Process[] processlist = Process.GetProcesses();
+
+            foreach (Process theprocess in processlist)
+            {
+                if (!String.IsNullOrEmpty(theprocess.MainWindowTitle))
+                {
+                    try
+                    {
+                        //winInfo WinPositions = new winInfo();
+                        //WinPositions = WinGetPos("ahk_PID " + theprocess.MainWindowHandle);
+
+                        if (ProcessName == "") { ProcessList.Add(theprocess); }  // return all processes if Process Name not provided
+
+                        if (ProcessName != "") { if (theprocess.ProcessName == ProcessName) { ProcessList.Add(theprocess); } } // return all processes if Process Name not provided
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            return ProcessList;
+        }
+
+        /// <summary>
+        /// Returns EXE Path from Process
+        /// </summary>
+        /// <param name="process"></param>
+        /// <returns></returns>
+        public string ProcessPath(Process p)
+        {
+            return p.MainModule.FileName;
+        }
+
+        /// <summary>
+        /// Returns Image from Process (Icon)
+        /// </summary>
+        /// <param name="process"></param>
+        /// <returns></returns>
+        public Image ProcessImage(Process p)
+        {
+            Icon ico = Icon.ExtractAssociatedIcon(p.MainModule.FileName);
+            Image IMG = ico.ToBitmap();
+            return IMG;
+        }
+
+
+        /// <summary>
+        /// Searches for Process by Name
+        /// </summary>
+        /// <param name="ProcessName"></param>
+        /// <returns></returns>
+        public Process ReturnProcess(string ProcessName)
+        {
+            List<Process> ProcessList = new List<Process>();
+
+            Process[] processlist = Process.GetProcesses();
+
+            foreach (Process theprocess in processlist)
+            {
+                if (!String.IsNullOrEmpty(theprocess.MainWindowTitle))
+                {
+                    try
+                    {
+                        if (ProcessName != "") { if (theprocess.ProcessName == ProcessName) { return theprocess; } } // return all processes if Process Name not provided
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            return new Process();
+        }
+
+
+        #endregion
 
 
     }

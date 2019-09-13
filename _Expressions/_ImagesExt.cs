@@ -19,7 +19,9 @@ namespace AHKExpressions
         /// <param name="FilePath"> </param>
         public static Image ToImg(this string FilePath)
         {
-            if (FilePath.IsImage())
+            _AHK ahk = new _AHK();
+
+            if (ahk.isImage(FilePath))
             {
                 if (File.Exists(FilePath))
                 {

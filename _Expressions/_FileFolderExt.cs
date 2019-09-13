@@ -549,7 +549,7 @@ namespace AHKExpressions
         public static bool OpenDir(this string DirPath, bool CreateIfMissing = false)
         {
             _AHK ahk = new _AHK();
-            if (DirPath.IsDir()) { return ahk.OpenDir(DirPath, CreateIfMissing); }
+            if (ahk.isDir(DirPath)) { return ahk.OpenDir(DirPath, CreateIfMissing); }
             if (File.Exists(DirPath)) { return ahk.OpenFileDir(DirPath); }
             else return false;
         }
@@ -776,8 +776,8 @@ namespace AHKExpressions
             keys = keys.Replace("°", ""); keys = keys.Replace("•", "");
             keys = keys.Replace("½", " Half "); keys = keys.Replace("²", "");
             keys = keys.Replace("À", "A"); keys = keys.Replace("  ", " ");
-            keys = keys.Trim();
-            keys = keys.ToLower(); keys = keys.ToTitleCase();
+            keys = keys.Trim(); 
+            keys = keys.ToLower(); keys = AHKExpressions.ToTitleCase(keys);
 
 
             List<string> keywords = StringSplit_List(keys, " ");

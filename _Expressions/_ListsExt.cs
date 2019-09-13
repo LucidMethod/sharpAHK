@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sharpAHK;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -354,6 +355,7 @@ namespace AHKExpressions
             return lastItem;
         }
 
+
         /// <summary>Return list split by SplitChar (ex: ",") as new string</summary>
         /// <param name="LIST">List to convert to string</param>
         /// <param name="SplitChar">Character to place between list items in string return</param>
@@ -391,7 +393,7 @@ namespace AHKExpressions
         public static List<string> toList(this string TextString, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
         {
             List<string> list = new List<string>();
-
+            _AHK ahk = new _AHK();
             // parse by new line
             {
                 // Creates new StringReader instance from System.IO
@@ -403,7 +405,7 @@ namespace AHKExpressions
                     {
                         if (SkipCommentLines)
                         {
-                            string First2 = line.FirstCharacters(2); // skip over lines if they are comments
+                            string First2 = ahk.FirstCharacters(line, 2);
                             if (First2 == @"//") { continue; }
                         }
 
@@ -429,6 +431,7 @@ namespace AHKExpressions
         {
             List<int> list = new List<int>();
             bool Trim = true;
+            _AHK ahk = new _AHK();
 
             // parse by new line
             {
@@ -441,7 +444,7 @@ namespace AHKExpressions
                     {
                         if (SkipCommentLines)
                         {
-                            string First2 = line.FirstCharacters(2); // skip over lines if they are comments
+                            string First2 = ahk.FirstCharacters(line, 2); // skip over lines if they are comments
                             if (First2 == @"//") { continue; }
                         }
 
@@ -451,7 +454,7 @@ namespace AHKExpressions
 
                         if (SkipBlankLines) { if (writeline == "") { continue; } }
 
-                        int WriteInt = writeline.ToInt();  // convert string from text to int
+                        int WriteInt = ahk.ToInt(writeline);   // convert string from text to int
 
                         list.Add(WriteInt);
                     }
@@ -468,9 +471,10 @@ namespace AHKExpressions
         /// <param name="SkipCommentLines"> </param>
         public static List<string> TextFile_ToList(this string FilePath, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
         {
+            _AHK ahk = new _AHK();
             if (File.Exists(FilePath))
             {
-                string ParseCode = FilePath.FileRead();
+                string ParseCode = ahk.FileRead(FilePath);
                 List<string> list = ParseCode.toList(SkipBlankLines, Trim, SkipCommentLines);
                 return list;
             }
@@ -484,7 +488,8 @@ namespace AHKExpressions
         /// <param name="FilePath"> </param>
         public static List<int> TextFile_ToListInt(this string FilePath)
         {
-            string ListTxt = FilePath.FileRead();
+            _AHK ahk = new _AHK();
+            string ListTxt = ahk.FileRead(FilePath);
             List<int> list = new List<int>();
 
             // parse by new line
@@ -492,11 +497,11 @@ namespace AHKExpressions
                 string[] lines = ListTxt.Split(Environment.NewLine.ToCharArray());
                 foreach (string line in lines)
                 {
-                    string First2 = line.FirstCharacters(2); // skip over lines if they are comments
+                    string First2 = ahk.FirstCharacters(line, 2); // skip over lines if they are comments
                     if (First2 == @"//") { continue; }
                     string writeline = line.Trim();  // trim leading spaces
                     if (writeline == "") { continue; }
-                    int lineInt = writeline.ToInt();  // convert line to integer
+                    int lineInt = ahk.ToInt(writeline);   // convert line to integer
                     list.Add(lineInt);
                 }
             }
@@ -615,6 +620,7 @@ namespace AHKExpressions
         /// <param name="Recurse"> </param>
         public static List<string> FileList_SortedAlpha_ByFileName(this string DirPath, string ExtTypes = "*.*", bool Recurse = true)
         {
+            _AHK ahk = new _AHK();
             string[] files = Directory.GetFiles(DirPath, ExtTypes, System.IO.SearchOption.AllDirectories);
 
             if (!Recurse) { files = Directory.GetFiles(DirPath, ExtTypes, System.IO.SearchOption.TopDirectoryOnly); }
@@ -626,7 +632,7 @@ namespace AHKExpressions
             List<string> filelistSort = new List<string>();
             foreach (string fil in filelist)  // loop through list items
             {
-                filelistSort.Add(fil.FileName() + "|" + fil);
+                filelistSort.Add(ahk.FileName(fil) + "|" + fil);
             }
             filelistSort.Sort();
 
@@ -656,6 +662,7 @@ namespace AHKExpressions
         public static List<string> FileList_Modified_Today(this string DirPath, string SearchPattern = "*.*", bool Recurse = true, bool FileNameOnly = false, bool IncludeExt = true)
         {
             List<string> FileList = new List<string>();
+            _AHK ahk = new _AHK();
 
             if (!Directory.Exists(DirPath)) { return null; }
 
@@ -670,8 +677,8 @@ namespace AHKExpressions
                 if (info.LastWriteTime.Date == DateTime.Today)  // if file modified today - add to list
                 {
                     string addFile = file;
-                    if (FileNameOnly) { addFile = file.FileName(); }
-                    if ((FileNameOnly) && (!IncludeExt)) { addFile = file.FileNameNoExt(); }
+                    if (FileNameOnly) { addFile = ahk.FileName(file); }
+                    if ((FileNameOnly) && (!IncludeExt)) { addFile = ahk.FileNameNoExt(file); }
                     FileList.Add(addFile);
                 }
 
@@ -705,7 +712,7 @@ namespace AHKExpressions
         public static List<string> FileList_Modified_Since(this string DirPath, DateTime Since, string SearchPattern = "*.*", bool Recurse = true, bool FileNameOnly = false, bool IncludeExt = true)
         {
             List<string> FileList = new List<string>();
-
+            _AHK ahk = new _AHK();
             if (!Directory.Exists(DirPath)) { return null; }
 
             string[] files = null;
@@ -722,8 +729,8 @@ namespace AHKExpressions
                 if (fileDate > Since)
                 {
                     string addFile = file;
-                    if (FileNameOnly) { addFile = file.FileName(); }
-                    if ((FileNameOnly) && (!IncludeExt)) { addFile = file.FileNameNoExt(); }
+                    if (FileNameOnly) { addFile = ahk.FileName(file); }
+                    if ((FileNameOnly) && (!IncludeExt)) { addFile = ahk.FileNameNoExt(file); }
                     FileList.Add(addFile);
                 }
 
@@ -1136,6 +1143,47 @@ namespace AHKExpressions
 
         #endregion
 
+        #region === List: Convert ===
+
+        /// <summary>
+        /// Convert List to DataTable
+        /// </summary>
+        /// <param name="dv"></param>
+        /// <param name="list"></param>
+        /// <param name="ListName"></param>
+        /// <param name="AddCheckBox"></param>
+        public static DataTable ToDT(this List<string> list, string ListHeader = "ListView", bool AddCheckBox = false, string CheckBoxHeader = "Selected")
+        {
+            //======= Create DataTable and Assign to DataGrid  =======
+            DataTable dt = new DataTable();
+
+            if (!AddCheckBox)
+            {
+                dt.Columns.Add(ListHeader, typeof(String));                     // Create Columns
+
+                foreach (string item in list)
+                {
+                    dt.Rows.Add(new object[] { item });
+                }
+            }
+
+            if (AddCheckBox)  // option to add checkboxes to first column of datagridview
+            {
+                dt.Columns.Add(CheckBoxHeader, typeof(bool));
+                dt.Columns.Add(ListHeader, typeof(String));
+
+                foreach (string item in list)
+                {
+                    dt.Rows.Add(new object[] { false, item });
+                }
+            }
+
+            return dt;
+        }
+
+
+        #endregion
+
 
         // === Dictionary ===
 
@@ -1252,10 +1300,12 @@ namespace AHKExpressions
         /// /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
         public static List<string> KeyList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
         {
+            _AHK ahk = new _AHK();
+
             // Get a List of all the Keys.
             List<string> keys = new List<string>(dictionary.Keys);
 
-            if (SortAlpha) { keys = keys.ListSORT(); }
+            if (SortAlpha) { keys = ahk.ListSORT(keys); }
 
             return keys;
         }
@@ -1266,9 +1316,10 @@ namespace AHKExpressions
         /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
         public static List<string> ValueList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
         {
+            _AHK ahk = new _AHK();
             // Get a List of all the values
             List<string> values = new List<string>(dictionary.Values);
-            if (SortAlpha) { values = values.ListSORT(); }
+            //if (SortAlpha) { values =  values.ListSORT(); }
             return values;
         }
 

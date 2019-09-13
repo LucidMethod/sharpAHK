@@ -29,7 +29,7 @@ using System.Data.SqlClient;
 using System.Web;
 using System.Xml;
 
-namespace AHKExpressions
+namespace StringExtension
 {
 
     /// <summary>
@@ -420,7 +420,8 @@ namespace AHKExpressions
 
         public static void Button_Image(Button button, string ImagePath, bool ImageLeft = true)
         {
-            Image image = ImagePath.ToImg(); // convert input to Image format
+            _AHK ahk = new _AHK();
+            Image image = ahk.ToImage(ImagePath); // convert input to Image format
 
             //=== Button Image: text far left - icon middle ====  (works)
             button.TextImageRelation = TextImageRelation.TextBeforeImage;
@@ -6516,7 +6517,8 @@ namespace AHKExpressions
         /// <param name="FilePath"> </param>
         public static Image ToImg(this string FilePath)
         {
-            if (FilePath.IsImage())
+            _AHK ahk = new _AHK();
+            if (ahk.isImage(FilePath))
             {
                 if (File.Exists(FilePath))
                 {
@@ -7667,6 +7669,8 @@ namespace AHKExpressions
         {
             List<string> list = new List<string>();
 
+            _AHK ahk = new _AHK();
+
             // parse by new line
             {
                 // Creates new StringReader instance from System.IO
@@ -7678,7 +7682,7 @@ namespace AHKExpressions
                     {
                         if (SkipCommentLines)
                         {
-                            string First2 = line.FirstCharacters(2); // skip over lines if they are comments
+                            string First2 = ahk.FirstCharacters(line, 2); // skip over lines if they are comments
                             if (First2 == @"//") { continue; }
                         }
 
@@ -7704,6 +7708,7 @@ namespace AHKExpressions
         {
             List<int> list = new List<int>();
             bool Trim = true;
+            _AHK ahk = new _AHK();
 
             // parse by new line
             {
@@ -7716,7 +7721,7 @@ namespace AHKExpressions
                     {
                         if (SkipCommentLines)
                         {
-                            string First2 = line.FirstCharacters(2); // skip over lines if they are comments
+                            string First2 = ahk.FirstCharacters(line, 2); // skip over lines if they are comments
                             if (First2 == @"//") { continue; }
                         }
 
@@ -7726,7 +7731,7 @@ namespace AHKExpressions
 
                         if (SkipBlankLines) { if (writeline == "") { continue; } }
 
-                        int WriteInt = writeline.ToInt();  // convert string from text to int
+                        int WriteInt = ahk.ToInt(writeline);  // convert string from text to int
 
                         list.Add(WriteInt);
                     }
@@ -7743,10 +7748,12 @@ namespace AHKExpressions
         /// <param name="SkipCommentLines"> </param>
         public static List<string> TextFile_ToList(this string FilePath, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
         {
+            _AHK ahk = new _AHK();
+
             if (File.Exists(FilePath))
             {
-                string ParseCode = FilePath.FileRead();
-                List<string> list = ParseCode.ToList(SkipBlankLines, Trim, SkipCommentLines);
+                string ParseCode = ahk.FileRead(FilePath);
+                List<string> list = ahk.Text_ToList(ParseCode, Trim, SkipCommentLines);
                 return list;
             }
             else
@@ -7759,7 +7766,11 @@ namespace AHKExpressions
         /// <param name="FilePath"> </param>
         public static List<int> TextFile_ToListInt(this string FilePath)
         {
-            string ListTxt = FilePath.FileRead();
+            _AHK ahk = new _AHK();
+
+            
+
+            string ListTxt = ahk.FileRead(FilePath);
             List<int> list = new List<int>();
 
             // parse by new line
@@ -7767,11 +7778,11 @@ namespace AHKExpressions
                 string[] lines = ListTxt.Split(Environment.NewLine.ToCharArray());
                 foreach (string line in lines)
                 {
-                    string First2 = line.FirstCharacters(2); // skip over lines if they are comments
+                    string First2 = ahk.FirstCharacters(line, 2);
                     if (First2 == @"//") { continue; }
                     string writeline = line.Trim();  // trim leading spaces
                     if (writeline == "") { continue; }
-                    int lineInt = writeline.ToInt();  // convert line to integer
+                    int lineInt = ahk.ToInt(writeline);  // convert line to integer
                     list.Add(lineInt);
                 }
             }
@@ -7898,10 +7909,12 @@ namespace AHKExpressions
             List<string> filelist = new List<string>(files);
             filelist.Sort();
 
+            _AHK ahk = new _AHK();
+
             List<string> filelistSort = new List<string>();
             foreach (string fil in filelist)  // loop through list items
             {
-                filelistSort.Add(fil.FileName() + "|" + fil);
+                filelistSort.Add(ahk.FileName(fil) + "|" + fil);
             }
             filelistSort.Sort();
 
@@ -7934,6 +7947,8 @@ namespace AHKExpressions
 
             if (!Directory.Exists(DirPath)) { return null; }
 
+            _AHK ahk = new _AHK();
+
             string[] files = null;
             if (Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); }
             if (!Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); }
@@ -7945,8 +7960,8 @@ namespace AHKExpressions
                 if (info.LastWriteTime.Date == DateTime.Today)  // if file modified today - add to list
                 {
                     string addFile = file;
-                    if (FileNameOnly) { addFile = file.FileName(); }
-                    if ((FileNameOnly) && (!IncludeExt)) { addFile = file.FileNameNoExt(); }
+                    if (FileNameOnly) { addFile = ahk.FileName(file); }
+                    if ((FileNameOnly) && (!IncludeExt)) { addFile = ahk.FileNameNoExt(file); }
                     FileList.Add(addFile);
                 }
 
@@ -7983,6 +7998,8 @@ namespace AHKExpressions
 
             if (!Directory.Exists(DirPath)) { return null; }
 
+            _AHK ahk = new _AHK();
+
             string[] files = null;
             if (Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); }
             if (!Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); }
@@ -7997,8 +8014,8 @@ namespace AHKExpressions
                 if (fileDate > Since)
                 {
                     string addFile = file;
-                    if (FileNameOnly) { addFile = file.FileName(); }
-                    if ((FileNameOnly) && (!IncludeExt)) { addFile = file.FileNameNoExt(); }
+                    if (FileNameOnly) { addFile = ahk.FileName(file); }
+                    if ((FileNameOnly) && (!IncludeExt)) { addFile = ahk.FileNameNoExt(file); }
                     FileList.Add(addFile);
                 }
 

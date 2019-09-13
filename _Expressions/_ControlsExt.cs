@@ -1,4 +1,5 @@
 ﻿using AHKExpressions;
+using sharpAHK;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,9 +15,10 @@ namespace AHKExpressions
         //  === Controls ===
 
 
-        public static void Button_Image(Button button, string ImagePath, bool ImageLeft = true)
+        public static void Button_Image(Button button, string ImgPath, bool ImageLeft = true)
         {
-            Image image = ImagePath.ToImg(); // convert input to Image format
+            _AHK ahk = new _AHK();
+            Image image = ahk.ToImage(ImgPath); // convert input to Image format
 
             //=== Button Image: text far left - icon middle ====  (works)
             button.TextImageRelation = TextImageRelation.TextBeforeImage;

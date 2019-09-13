@@ -82,6 +82,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DOCUMENTATION.cs" />
     <Compile Include="Util\AhkEscape.cs" />
     <Compile Include="Util\AutoHotkeyDll.cs" />
     <Compile Include="Util\AutoHotkeyEngine.cs" />
@@ -112,6 +113,8 @@
     <Compile Include="Util\EmbededResourceHelper.cs" />
     <Compile Include="Util\ProcessorType.cs" />
     <Compile Include="_sharpAHK\AHK.cs" />
+    <Compile Include="_sharpAHK\AHKcsharp.cs" />
+    <Compile Include="_sharpAHK\AHK_Expressions.cs" />
     <Compile Include="_sharpAHK\_AutoHotkey.cs" />
     <Compile Include="_sharpAHK\_Clipboard.cs" />
     <Compile Include="_sharpAHK\_Controls.cs" />
@@ -154,8 +157,12 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <EmbeddedResource Include="Util\x86\v2_AutoHotkey.dll" />
+    <None Include="sharpAHK.csproj.nuspec" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include=".gitignore" />
+    <Content Include="sharpAHK.csproj.vspscc" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -163,8 +170,8 @@
     </PropertyGroup>
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)*.*" "$(SolutionDir)sharpAHK_Dev\dlls" /Y
-xcopy "$(TargetDir)*.dll" "$(SolutionDir)SSI_Shared\dlls" /Y</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

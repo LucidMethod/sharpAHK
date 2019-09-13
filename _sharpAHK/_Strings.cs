@@ -943,7 +943,8 @@ namespace sharpAHK
         /// <returns></returns>
         public string Encode(string TitleText)
         {
-            return TitleText.Encode();
+            _AHK ahk = new _AHK();
+            return ahk.Encode(TitleText);
         }
 
         /// <summary>
@@ -953,7 +954,8 @@ namespace sharpAHK
         /// <returns></returns>
         public string Decode(string TitleText)
         {
-            return TitleText.Decode();
+            _AHK ahk = new _AHK();
+            return ahk.Decode(TitleText);
         }
 
 
@@ -1111,7 +1113,7 @@ namespace sharpAHK
                 int i = 0;
                 foreach (var item in row.ItemArray)
                 {
-                    if (i == 0) { Item.Checked = item.ToBool(); }
+                    if (i == 0) { Item.Checked = ToBool(item); }
                     if (i == 1) { Item.FieldName = item.ToString(); }
                     if (i == 2) { Item.FieldValue = item.ToString(); }
                     if (i == 3) { Item.FieldType = item.ToString(); }
@@ -1189,6 +1191,7 @@ namespace sharpAHK
         public List<dtLoop> DTLoop_DtLoopFromObjString(string ObjString)
         {
             List<dtLoop> Items = new List<dtLoop>();
+            _AHK ahk = new _AHK();
 
             string VarType = "";
             List<string> lines = StringSplit_List(ObjString, "|", false);
@@ -1205,7 +1208,7 @@ namespace sharpAHK
                     fieldtype = item;
 
                     dtLoop Item = new dtLoop();
-                    Item.Checked = selected.ToBool();
+                    Item.Checked = ahk.ToBool(selected);
                     Item.FieldName = fieldname;
                     Item.FieldValue = ObjStringRestore(fieldvalue);
                     Item.FieldType = fieldtype;
