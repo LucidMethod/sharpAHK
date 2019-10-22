@@ -1194,9 +1194,8 @@ namespace sharpAHK
         {
             List<Process> ProcessList = new List<Process>();
 
-            Process[] processlist = Process.GetProcesses();
-
-            foreach (Process theprocess in processlist)
+            // loop through system processes 
+            foreach (Process theprocess in Process.GetProcesses())
             {
                 if (!String.IsNullOrEmpty(theprocess.MainWindowTitle))
                 {
@@ -1258,7 +1257,7 @@ namespace sharpAHK
                 {
                     try
                     {
-                        if (ProcessName != "") { if (theprocess.ProcessName == ProcessName) { return theprocess; } } // return all processes if Process Name not provided
+                        if (ProcessName != "") { if (theprocess.ProcessName.ToLower() == ProcessName.ToLower() || theprocess.ProcessName.ToLower() == ProcessName.ToLower() + ".exe") { return theprocess; } } // return all processes if Process Name not provided
                     }
                     catch
                     {

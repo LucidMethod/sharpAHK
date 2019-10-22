@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AHKExpressions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -98,7 +99,79 @@ namespace sharpAHK
         }
 
 
+        /// <summary>
+        /// Returns Public IP Address
+        /// </summary>
+        /// <returns></returns>
+        public static string PublicIP()
+        {
+            string url = "http://checkip.dyndns.org";
+            System.Net.WebRequest req = System.Net.WebRequest.Create(url);
+            System.Net.WebResponse resp = req.GetResponse();
+            System.IO.StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());
+            string response = sr.ReadToEnd().Trim();
+            string[] a = response.Split(':');
+            string a2 = a[1].Substring(1);
+            string[] a3 = a2.Split('<');
+            string a4 = a3[0];
+            return a4;
+        }
 
-        
+
+        /// <summary>
+        /// Takes HTML Listing from IIS Directory Listing and Parses Out Links (works for 1 directory deep)
+        /// </summary>
+        /// <param name="URL"></param>
+        /// <returns></returns>
+        public List<string> LinkFromIISDir(string URL = "http://liveinthemedia.com/Sonarr")
+        {
+            List<string> Links = new List<string>();
+
+            string baseURL = URL;
+            WebClient client = new WebClient();
+            string content = "";
+
+            try
+            {
+                content = client.DownloadString(baseURL);
+            }
+            catch (Exception ex)
+            {
+                MsgBox(ex.ToString());
+                return Links;
+            }
+
+            if (content != "")
+            {
+                string url = "";
+                List<string> Lines = Text_ToList(content, true, true, false);
+                foreach (string line in Lines)
+                {
+                    if (line.Contains("<frame src="))
+                    {
+                        url = StringSplit(line, "\"", 1).Replace("\"", "");
+                    }
+                }
+
+                string Folder = StringSplit(baseURL, "/", 0, true);
+                string bURL = baseURL.Replace(Folder, "").TrimLast(1);
+
+                string html = Download_HTML(url);
+                html = html.Replace("<A HREF=", "|");
+                List<string> lines = StringSplit_List(html, "|", true);
+                int i = 0; string header = "";
+                foreach (string line in lines)
+                {
+                    i++; if (i < 3) { header = header + line; continue; } // skip first two header lines
+                    string tLine = StringSplit(line, ">", 0).Replace("\"", "");
+
+                    string urr = bURL + tLine;
+                    Links.Add(urr);
+                }
+            }
+
+            return Links;
+        }
+
     }
 }

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace sharpAHK
 {
@@ -563,7 +566,6 @@ namespace sharpAHK
             return rlist;
         }
 
-
         /// <summary>Retrieves the specified window's unique AHK ID</summary>
         /// <param name="WinTitle">The title or partial title of the target window (the matching behavior is determined by SetTitleMatchMode). If this and the other 3 parameters are omitted, the Last Found Window will be used. To use a window class, specify ahk_class ExactClassName (shown by Window Spy). To use a process identifier (PID), specify ahk_pid %VarContainingPID%. To use a window group, specify ahk_group GroupName. To use a window's unique ID number, specify ahk_id %VarContainingID%. The search can be narrowed by specifying multiple criteria. For example: My File.txt ahk_class Notepad</param>
         /// <param name="WinText">If present, this parameter must be a substring from a single text element of the target window (as revealed by the included Window Spy utility). Hidden text elements are detected if DetectHiddenText is ON.</param>
@@ -591,7 +593,6 @@ namespace sharpAHK
             OutVar = "ahk_PID " + OutVar;
             return OutVar;
         }
-
 
         /// <summary>
         /// Returns the Active Window Handle
@@ -656,17 +657,16 @@ namespace sharpAHK
 
 
             //Returns Active Window Title as String
-
-            const int nChars = 256;
-            StringBuilder Buff = new StringBuilder(nChars);
-            IntPtr handle = GetForegroundWindow();
-
-            if (GetWindowText(handle, Buff, nChars) > 0)
+            try
             {
-                return Buff.ToString();
+                const int nChars = 256;
+                StringBuilder Buff = new StringBuilder(nChars);
+                IntPtr handle = GetForegroundWindow();
+                if (GetWindowText(handle, Buff, nChars) > 0) { return Buff.ToString(); }
             }
-            return null;
+            catch(Exception ex) { MsgBox(ex.ToString()); }
 
+            return null;
         }
 
         /// <summary>Retrieves the specified window's class name.</summary>
@@ -1273,21 +1273,16 @@ namespace sharpAHK
         public List<string> WinList()
         {
             List<string> WinList = new List<string>();
-
-            Process[] processlist = Process.GetProcesses();
-
-            foreach (Process process in processlist)
+            foreach (Process process in Process.GetProcesses())
             {
                 if (!String.IsNullOrEmpty(process.MainWindowTitle))
                 {
                     //Console.WriteLine("Process: {0} ID: {1} Window title: {2}", process.ProcessName, process.Id, process.MainWindowTitle);
                     //MsgBox("ProcessName: " + process.ProcessName + Environment.NewLine + "ProcessID: " + process.Id + Environment.NewLine + "WinTitle: " + process.MainWindowTitle);
-
                     // add to list if not already in the list
                     WinList.Add(process.MainWindowTitle);
                 }
             }
-
             return WinList;
         }
 
@@ -1372,7 +1367,7 @@ namespace sharpAHK
         /// </summary>
         /// <param name="WinTitle"></param>
         /// <returns></returns>
-        public winInfo Return_wInfo(object WinTitle)
+        public winInfo Return_wInfo(object WinTitle, bool WindowScreenCap = true)
         {
             //public wInfo MouseGetPos()  // gets the current mouse position, returns wInfo object populated (includes control info/handles)
 
@@ -1380,8 +1375,6 @@ namespace sharpAHK
             var ahkdll = ahkGlobal.ahkdll;
 
             winInfo info = new winInfo(); // declare the object to return populated
-
-
 
             //ahkdll.SetVar("OutputVar", "");
             string Command = "MouseGetPos, MouseX, MouseY, WinID, ControlID, 3";
@@ -1406,8 +1399,7 @@ namespace sharpAHK
             ////    info.ControlHwnd = ToIntPtr(cID);  // int to IntPtr
             ////}
 
-            //info.WinHwnd = WinHwnd(WinTitle);
-
+            //info. = WinHwnd(WinTitle);
             //info.WinClass = WinGetClass(WinTitle);   // win class
 
 
@@ -1418,26 +1410,146 @@ namespace sharpAHK
             Rect ReturnRect = new Rect(); // declare the object to return populated
             IntPtr hWnd = WinGetHwnd(WinTitle.ToString());  //returns Window Handle (from either handle or window title)
 
-            _GetWindowRect(hWnd, ref ReturnRect);   //return the window dimensions
+            //return the window dimensions
+            //try { _GetWindowRect(hWnd, ref ReturnRect); } catch { }
 
-            // set the values / calculate width/height
-            int x = ReturnRect.Left;
-            int y = ReturnRect.Top;
+            winInfo winif = WinGetPos(WinTitle.ToString());
 
-            int Width = ReturnRect.Right - ReturnRect.Left;
-            int Height = ReturnRect.Bottom - ReturnRect.Top;
+            info.WinX = winif.WinX;
+            info.WinY = winif.WinY;
+            info.WinW = winif.WinW;
+            info.WinH = winif.WinH;
 
 
-            info.WinX = ReturnRect.Left;
-            info.WinY = ReturnRect.Top;
-            info.WinW = Width;
-            info.WinH = Height;
+            // Window Coordinates on Screen
+            //info.WinX = ReturnRect.Left;
+            //info.WinY = ReturnRect.Top;
+            //info.WinW = ReturnRect.Right - ReturnRect.Left;
+            //info.WinH = ReturnRect.Bottom - ReturnRect.Top;
+
+            // extract icon from exe path, convert to Image
+            try { info.WinIcon = Icon.ExtractAssociatedIcon(WinTitle.ToString()).ToBitmap(); } catch { }
+            
+            if (WindowScreenCap)
+            {
+                //==============================================================
+                // Take ScreenShot of Window
+                //==============================================================
+                var bmpScreenshot = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
+                                               Screen.PrimaryScreen.Bounds.Height,
+                                               PixelFormat.Format32bppArgb);
+
+                // Create a graphics object from the bitmap.
+                var gfxScreenshot = Graphics.FromImage(bmpScreenshot);
+
+                // Take the screenshot from the upper left corner to the right bottom corner.
+                gfxScreenshot.CopyFromScreen(info.WinX,
+                                            info.WinY,
+                                            info.WinW,
+                                            info.WinH,
+                                            Screen.PrimaryScreen.Bounds.Size,
+                                            CopyPixelOperation.SourceCopy);
+
+                // Save the screenshot to the specified path that the user has chosen.
+                //bmpScreenshot.Save(SaveFile, ImageFormat.Png);
+                info.WinScreenShot = bmpScreenshot;
+            }
 
 
             return info;
         }
 
 
+
+        // Win Actions
+
+        public enum WinActions
+        {
+            AlwaysOnTop,
+            AlwaysOnTopOff,
+            WinSetBottom,
+            WinSetTop,
+            WinSetEnable,
+            WinSetDisable,
+            WinSetRedraw,
+            WinActivate,
+            WinActivateBottom,
+            WinClose,
+            WinHide,
+            WinShow,
+            WinMinimize,
+            WinMaximize,
+            WinKill,
+            WinMinimizeAll,
+            WinMinimizeAllUndo,
+            WinRestore
+        }
+
+        /// <summary>
+        /// Returns List of Window Actions
+        /// </summary>
+        /// <returns>Returns List of WinGet Commands (WinGetCmd)</returns>
+        public List<string> WinActionsList()
+        {
+            List<string> rlist = new List<string>();
+            Array list = Enum.GetValues(typeof(_AHK.WinActions));
+            foreach (var item in list) { rlist.Add(item.ToString()); }
+            return rlist;
+        }
+
+
+        /// <summary>
+        /// Window Actions by WinTitle
+        /// </summary>
+        /// <param name="WinTitle">Window Title / AHK ID</param>
+        /// <param name="Action">WinAction to Perform on WinTitle</param>
+        public void WinAction(string WinTitle, WinActions Action)
+        {
+            if (Action == WinActions.AlwaysOnTop) { AlwaysOnTop(WinTitle, true); }
+            if (Action == WinActions.AlwaysOnTopOff) { AlwaysOnTop(WinTitle, false); }
+            if (Action == WinActions.WinSetBottom) { WinSetBottom(WinTitle); }
+            if (Action == WinActions.WinSetTop) { WinSetTop(WinTitle); }
+            if (Action == WinActions.WinSetEnable) { WinSetEnable(WinTitle); }
+            if (Action == WinActions.WinSetDisable) { WinSetDisable(WinTitle); }
+            if (Action == WinActions.WinSetRedraw) { WinSetRedraw(WinTitle); }
+            if (Action == WinActions.WinActivate) { WinActivate(WinTitle); }
+            if (Action == WinActions.WinActivateBottom) { WinActivateBottom(WinTitle); }
+            if (Action == WinActions.WinClose) { WinClose(WinTitle); }
+            if (Action == WinActions.WinHide) { WinHide(WinTitle); }
+            if (Action == WinActions.WinShow) { WinShow(WinTitle); }
+            if (Action == WinActions.WinMinimize) { WinMinimize(WinTitle); }
+            if (Action == WinActions.WinMaximize) { WinMaximize(WinTitle); }
+            if (Action == WinActions.WinKill) { WinKill(WinTitle); }
+            if (Action == WinActions.WinMinimizeAll) { WinMinimizeAll(); }
+            if (Action == WinActions.WinMinimizeAllUndo) { WinMinimizeAllUndo(); }
+            if (Action == WinActions.WinRestore) { WinRestore(WinTitle); }
+        }
+        /// <summary>
+        /// Window Actions by WinTitle
+        /// </summary>
+        /// <param name="WinTitle">Window Title / AHK ID</param>
+        /// <param name="Action">WinAction to Perform on WinTitle</param>
+        public void WinAction(string WinTitle, string Action)
+        {
+            if (Action.ToUpper() == WinActions.AlwaysOnTop.ToString().ToUpper()) { AlwaysOnTop(WinTitle, true); }
+            if (Action.ToUpper() == WinActions.AlwaysOnTopOff.ToString().ToUpper()) { AlwaysOnTop(WinTitle, false); }
+            if (Action.ToUpper() == WinActions.WinSetBottom.ToString().ToUpper()) { WinSetBottom(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinSetTop.ToString().ToUpper()) { WinSetTop(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinSetEnable.ToString().ToUpper()) { WinSetEnable(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinSetDisable.ToString().ToUpper()) { WinSetDisable(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinSetRedraw.ToString().ToUpper()) { WinSetRedraw(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinActivate.ToString().ToUpper()) { WinActivate(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinActivateBottom.ToString().ToUpper()) { WinActivateBottom(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinClose.ToString().ToUpper()) { WinClose(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinHide.ToString().ToUpper()) { WinHide(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinShow.ToString().ToUpper()) { WinShow(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinMinimize.ToString().ToUpper()) { WinMinimize(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinMaximize.ToString().ToUpper()) { WinMaximize(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinKill.ToString().ToUpper()) { WinKill(WinTitle); }
+            if (Action.ToUpper() == WinActions.WinMinimizeAll.ToString().ToUpper()) { WinMinimizeAll(); }
+            if (Action.ToUpper() == WinActions.WinMinimizeAllUndo.ToString().ToUpper()) { WinMinimizeAllUndo(); }
+            if (Action.ToUpper() == WinActions.WinRestore.ToString().ToUpper()) { WinRestore(WinTitle); }
+        }
 
 
     }

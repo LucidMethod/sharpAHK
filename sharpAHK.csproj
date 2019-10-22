@@ -127,6 +127,7 @@
     <Compile Include="_sharpAHK\_Hotkeys.cs" />
     <Compile Include="_sharpAHK\_Images.cs" />
     <Compile Include="_sharpAHK\_INI.cs" />
+    <Compile Include="_sharpAHK\_Launch.cs" />
     <Compile Include="_sharpAHK\_Lists.cs" />
     <Compile Include="_sharpAHK\_Math.cs" />
     <Compile Include="_sharpAHK\_Monitor.cs" />

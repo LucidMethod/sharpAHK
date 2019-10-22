@@ -33,7 +33,7 @@ namespace sharpAHK
 
             if (VarType == "System.String")
             {
-                if (TrueFalseVar.ToString().ToUpper() == "TRUE" || TrueFalseVar.ToString().ToUpper() == "YES") { return true; }
+                if (TrueFalseVar.ToString().ToUpper() == "TRUE" || TrueFalseVar.ToString().ToUpper() == "YES" || TrueFalseVar.ToString().Trim() == "1") { return true; }
                 else { return false; }
             }
 
@@ -723,6 +723,10 @@ namespace sharpAHK
             /// Telerik.WinControls.UI.RadMenuItem
             /// </summary>
             RadMenuItem,
+            /// <summary>
+            /// Telerik.WinControls.UI.RadMenuButtonItem
+            /// </summary>
+            RadMenuButtonItem,
             /// <summary>
             /// Telerik.WinControls.UI.RadNode
             /// </summary>

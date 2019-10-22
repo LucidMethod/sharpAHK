@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+<metadata>
+<id>sharpAHK</id>
+<authors>LucidMethod</authors>
+<version>1.0.0.7</version>
+<owners>LucidMethod</owners>
+<licenseUrl>https://github.com/LucidMethod</licenseUrl>
+<license type="file">LICENSE</license>
+<projectUrl>https://github.com/LucidMethod</projectUrl>
+<iconUrl>https://github.com/LucidMethod/icon.ico</iconUrl>
+<requireLicenseAcceptance>false</requireLicenseAcceptance>
+<description>AutoHotkey for C#</description>
+<releaseNotes>SharpAHK Release</releaseNotes>
+<copyright>Copyright 2019</copyright>
+<tags>sharpAHK AutoHotkey</tags>
+<dependencies>
+</dependencies>
+</metadata>
+</package>

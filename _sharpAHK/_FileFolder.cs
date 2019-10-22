@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -507,7 +508,7 @@ namespace sharpAHK
         //    return OutVar;
         //}
 
-
+ 
         /// <summary>Retrieves the datetime stamp of a file or folder.</summary>
         /// <param name="Filename">The name of the target file, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
         /// <param name="WhichTime">Which timestamp to retrieve: M = Modification time (default if omitted) | C = Creation time | A = Last access time   </param>        
@@ -534,22 +535,35 @@ namespace sharpAHK
         /// <param name="SourcePattern">The name of a single file or a wildcard pattern such as C:\Temp\*.tmp. SourcePattern is assumed to be in %A_WorkingDir% if an absolute path isn't specified.</param>
         /// <param name="DestPattern">The name or pattern of the destination, which is assumed to be in %A_WorkingDir% if an absolute path isn't specified. To perform a simple move -- retaining the existing file name(s) -- specify only the folder name as shown in these functionally identical examples: FileMove, C:\*.txt, C:\My Folder</param>
         /// <param name="OverWrite">Determines whether to overwrite files if they already exist</param>
-        public bool FileMove(string SourcePattern, string DestPattern, bool OverWrite = false)
+        public bool FileMove(string SourcePattern, string DestPattern, bool OverWrite = false, bool ProgressDialog = false)
         {
-            // change overwrite bool to 1/0 
-            int overWrite = 0; if (OverWrite) { overWrite = 1; }
-
-            string source = SourcePattern.Replace(",", "`,");
-            string dest = DestPattern.Replace(",", "`,");
-
-            //string source = StringReplace(SourcePattern, ",", "`,", "ALL"); // fix illegal ahk chars
-
-            string AHKLine = "FileMove, " + source + ", " + dest + ", " + overWrite;  // ahk line to execute
-            ErrorLog_Setup(true, "Error Moving [ELV] Files"); // ErrorLevel Detection Enabled for this function in AHK 
-            Execute(AHKLine);   // execute AHK code and return variable value
-
-            if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
-            return false;  // error level detected - success = false
+            if (!ProgressDialog)
+            {
+                // change overwrite bool to 1/0 
+                int overWrite = 0; if (OverWrite) { overWrite = 1; }
+                string source = SourcePattern.Replace(",", "`,");
+                string dest = DestPattern.Replace(",", "`,");
+                //string source = StringReplace(SourcePattern, ",", "`,", "ALL"); // fix illegal ahk chars
+                string AHKLine = "FileMove, " + source + ", " + dest + ", " + overWrite;  // ahk line to execute
+                ErrorLog_Setup(true, "Error Moving [ELV] Files"); // ErrorLevel Detection Enabled for this function in AHK 
+                Execute(AHKLine);   // execute AHK code and return variable value
+                if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
+                return false;  // error level detected - success = false
+            }
+            else  //=== C# FileMove Method - With Progress Dialog ===
+            {
+                try
+                {
+                    Computer comp = new Computer();
+                    comp.FileSystem.MoveFile(SourcePattern, DestPattern, Microsoft.VisualBasic.FileIO.UIOption.AllDialogs, UICancelOption.DoNothing);
+                }
+                catch (Exception ex)
+                {
+                    MsgBox(ex.ToString());
+                    return false;
+                }
+                return true;
+            }
 
             // v1 ToDo
             /*
@@ -1132,16 +1146,25 @@ namespace sharpAHK
             }
             else
             {
-                System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
-
-                //option to remove leading . in front of extention
-                string ext = fileinfo.Extension;
-                if (RemovePrefix)
+                try
                 {
-                    ext = StringReplace(ext, ".", "");
-                }
+                    System.IO.FileInfo fileinfo = new System.IO.FileInfo(FilePath); //retrieve info about each file
 
-                return ext;
+                    //option to remove leading . in front of extention
+                    string ext = fileinfo.Extension;
+                    if (RemovePrefix)
+                    {
+                        ext = StringReplace(ext, ".", "");
+                    }
+
+                    return ext;
+                }
+                catch
+                {
+                    string Ext = StringSplit(FilePath, ".", 0, true);
+                    if (RemovePrefix) { return Ext; }
+                    else { return "." + Ext; }
+                }
             }
         }
 
@@ -1462,6 +1485,28 @@ namespace sharpAHK
             return lastAccessTime;
         }
 
+
+        // File Icon
+
+        /// <summary>
+        /// Returns File's Icon As Image
+        /// </summary>
+        /// <param name="FilePath">Path To File</param>
+        /// <returns></returns>
+        public Image FileIco(string FilePath)
+        {
+            return Icon.ExtractAssociatedIcon(FilePath).ToBitmap();
+        }
+
+        /// <summary>
+        /// Returns File's Icon
+        /// </summary>
+        /// <param name="FilePath">Path To File</param>
+        /// <returns></returns>
+        public Icon FileIcon(string FilePath)
+        {
+            return Icon.ExtractAssociatedIcon(FilePath); 
+        }
 
         // File Compare
 

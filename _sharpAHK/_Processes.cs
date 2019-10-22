@@ -32,6 +32,8 @@ namespace sharpAHK
         /// <returns>Returns OutputVarPID as string</returns>
         public string Run(string Target, string WorkingDir = "", string MinMaxHideUseErrorLevel = "")
         {
+            if (Target == null) { return ""; }
+
             string target = Target.Replace(",", "`,");
             string workingDir = WorkingDir.Replace(",", "`,");
 

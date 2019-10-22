@@ -474,6 +474,15 @@ namespace sharpAHK
         }
 
 
+        /// <summary>
+        /// Returns Current Time as yyyyMMddHHmmss to use as Unique FileName
+        /// </summary>
+        /// <returns></returns>
+        public string TimeStamp()
+        {
+            return DateTime.Now.ToString("yyyyMMddHHmmss");
+        }
+
         #endregion
 
         #region === Log / Debug ===
