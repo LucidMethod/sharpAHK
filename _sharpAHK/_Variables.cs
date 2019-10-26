@@ -257,7 +257,7 @@ namespace sharpAHK
         /// </summary>
         /// <param name="FormattedFileSize">string with file size, ex: 32 KB/MB/GB/TB</param>
         /// <returns></returns>
-        public int ToBytes(string FormattedFileSize)
+        public long ToBytes(string FormattedFileSize)
         {
             string size = FormattedFileSize;
             double Bytes = 0;
@@ -299,7 +299,7 @@ namespace sharpAHK
                 Bytes = Bytes * 1024.0;
             }
 
-            return (int)Bytes;
+            return (long)Bytes;
         }
 
 
