@@ -62,6 +62,11 @@ namespace sharpAHK
             //throw new System.InvalidOperationException("Value is NULL");
             if (IniPath == null) { throw new System.InvalidOperationException("IniPath Cannot be Null"); }
 
+            if (IniPath.Contains("!")) { IniPath = IniPath.Replace("!", ""); }
+            if (IniPath.Contains(":")) { IniPath = IniPath.Replace(":", "-"); }
+            if (IniPath.Contains("%")) { IniPath = IniPath.Replace("%", ""); }
+            if (IniPath.Contains("/")) { IniPath = IniPath.Replace("/", " "); }
+
             string filename = IniPath.Replace(",", "`,");
             string section = Section.Replace(",", "`,");
             string key = Key.Replace(",", "`,");

@@ -1,6 +1,7 @@
 ﻿using AHKExpressions;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -98,6 +99,21 @@ namespace sharpAHK
             else { MsgBox("Error Saving " + localFileName + " ??\n\nLocal File Not Found\n\nURL: " + remoteFileUrl); return false; }
         }
 
+        /// <summary>
+        /// URL to Image
+        /// </summary>
+        /// <param name="URL"></param>
+        /// <returns></returns>
+        public Image Download_Image(string URL)
+        {
+            using (System.Net.WebClient webClient = new System.Net.WebClient())
+            {
+                using (Stream stream = webClient.OpenRead(URL))
+                {
+                    return Image.FromStream(stream);
+                }
+            }
+        }
 
         /// <summary>
         /// Returns Public IP Address
