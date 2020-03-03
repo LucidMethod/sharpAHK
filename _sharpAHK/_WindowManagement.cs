@@ -988,6 +988,10 @@ namespace sharpAHK
         /// <param name="ExcludeText">Windows whose text include this value will not be considered.</param>/// 
         public void WinMove(string WinTitle, string WinText = "", object X = null, object Y = null, object Width = null, object Height = null, string ExcludeTitle = "", string ExcludeText = "")
         {
+            if (X == null) { X = "0"; }
+            if (Y == null) { Y = "0"; }
+            if (Width == null) { Width = ""; }
+            if (Height == null) { Height = ""; }
             ErrorLog_Setup(false);
             Execute("WinMove, " + WinTitle + "," + WinText + "," + X.ToString() + "," + Y + "," + Width.ToString() + "," + Height.ToString() + "," + ExcludeTitle + "," + ExcludeText);
 
