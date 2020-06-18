@@ -12,8 +12,10 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AHKExpressions;
 
 namespace sharpAHK
 {
@@ -555,7 +557,15 @@ namespace sharpAHK
                 try
                 {
                     Computer comp = new Computer();
-                    comp.FileSystem.MoveFile(SourcePattern, DestPattern, Microsoft.VisualBasic.FileIO.UIOption.AllDialogs, UICancelOption.DoNothing);
+
+                    if (SourcePattern.IsDir()) // different command when moving a folder
+                    {
+                        comp.FileSystem.MoveDirectory(SourcePattern, DestPattern, Microsoft.VisualBasic.FileIO.UIOption.AllDialogs, UICancelOption.DoNothing); 
+                    }
+                    else
+                    {
+                        comp.FileSystem.MoveFile(SourcePattern, DestPattern, Microsoft.VisualBasic.FileIO.UIOption.AllDialogs, UICancelOption.DoNothing);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1687,19 +1697,19 @@ namespace sharpAHK
         /// <param name="Recurse"> </param>
         /// <param name="FileNameOnly"> </param>
         /// <param name="IncludeExt"> </param>
-        public List<string> FileList(string DirPath, string SearchPattern = "*.*", bool Recurse = true, bool FileNameOnly = false, bool IncludeExt = true)
+        public List<string> FileList(string DirPath, string SearchPattern = "*.*", bool Recurse = true, bool FileNameOnly = false, bool IncludeExt = true, bool SortAlpha = false)
         {
             List<string> FileList = new List<string>();
 
             if (!Directory.Exists(DirPath)) { return FileList; }
 
             string[] files = null;
-            if (Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); }
-            if (!Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); }
+            if (Recurse) { try { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); } catch { } }
+            if (!Recurse) { try { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); } catch { } }
 
             if (SearchPattern.Contains("|"))
             {
-                files = Directory.GetFiles("path_to_files").Where(file => Regex.IsMatch(file, @"^.+\.(" + SearchPattern + ")$")).ToArray();
+                try { files = Directory.GetFiles("path_to_files").Where(file => Regex.IsMatch(file, @"^.+\.(" + SearchPattern + ")$")).ToArray(); } catch { }
             }
 
 
@@ -1709,10 +1719,11 @@ namespace sharpAHK
                 if (FileNameOnly) { addFile = FileName(file); }
                 if ((FileNameOnly) && (!IncludeExt)) { addFile = FileNameNoExt(file); }
 
-
                 // add file to list to return
                 FileList.Add(addFile);
             }
+
+            if (SortAlpha) { FileList = ListSORT(FileList); }
 
             return FileList;
         }
@@ -1750,17 +1761,11 @@ namespace sharpAHK
         /// <param name="FileName"></param>
         /// <param name="ReplaceChar">Character to replace illegal characters with, Default = Space</param>
         /// <returns></returns>
-        public string SafeSaveName(string FileName, string ReplaceChar = " ")
+        public string SafeSaveName(string FileName, string ReplaceChar = "")
         {
-            string showNameSave = FileName.Replace("|", " ");
-            showNameSave = showNameSave.Replace(@"\", " ");
-            showNameSave = showNameSave.Replace(@"/", " ");
-            showNameSave = showNameSave.Replace(@":", " ");
-            showNameSave = showNameSave.Replace(@"*", " ");
-            showNameSave = showNameSave.Replace(@"?", " ");
-            showNameSave = showNameSave.Replace(@"<", " ");
-            showNameSave = showNameSave.Replace(@">", " ");
-
+            string showNameSave = FileName.Replace("|", ReplaceChar).Replace(@"\", ReplaceChar).Replace(@"/", ReplaceChar);
+            showNameSave = showNameSave.Replace(":", ReplaceChar).Replace("*", ReplaceChar).Replace("?", ReplaceChar).Replace("<", ReplaceChar);
+            showNameSave = showNameSave.Replace(">", ReplaceChar).Replace(";", ReplaceChar);
             return showNameSave;
         }
 
@@ -2219,7 +2224,7 @@ namespace sharpAHK
                 // 3.
                 // Use FileInfo to get length of each file.
                 FileInfo info = new FileInfo(name);
-                b += info.Length;
+                if (info.Exists) { b += info.Length; }
             }
 
             string size = b.ToString();
@@ -2418,7 +2423,37 @@ namespace sharpAHK
             //MessageBox.Show("Its a file");
         }
 
-
+        /// <summary>
+        /// Loop Through Root Folder, For Each SubFolder and Move Files in SubFolders To Root, Then Removes the SubFolders Leaving Only Files
+        /// </summary>
+        /// <param name="RootDirPath"></param>
+        /// <param name="Bar"></param>
+        /// <param name="NewThread"></param>
+        public void UnFolder(string RootDirPath,bool NewThread = true)
+        {
+            if (NewThread)
+            {
+                Thread processThread = new Thread(() => UnFolder(RootDirPath, false)); // define thread action
+                processThread.Start();
+            }
+            else
+            {
+                RemoveEmptyDirs(RootDirPath);
+                List<string> Dirs = DirList(RootDirPath, "*.*", false, true); int movedC = 0;
+                foreach (string dir in Dirs)
+                {
+                    List<string> files = FileList(dir);
+                    foreach (string file in files)
+                    {
+                        string newPath = RootDirPath + "\\" + DirName(dir).Replace(":", "-").Replace(";", "-") + "_" + FileName(file).Replace(":", "-").Replace(";", "-");
+                        bool moved = FileMove(file, newPath);
+                        if (!moved) { MsgBox("Error Moving: " + file + "\nTo: " + newPath); }
+                        else { movedC++; }
+                    }
+                }
+                RemoveEmptyDirs(RootDirPath);
+            }
+        }
 
         #endregion
 

@@ -6169,6 +6169,8 @@ namespace StringExtension
 
         #region === Convert ===
 
+
+
         /// <summary>Converts String/Int To Bool Variable Type</summary>
         /// <param name="TrueFalseVar">String/Int to Convert</param>
         /// <returns>Returns BOOL Variable Type From Input String/Int</returns>
@@ -8559,7 +8561,7 @@ namespace StringExtension
         /// </summary>
         /// <param name="Text">String to check word count</param>
         /// <returns></returns>
-        public static int WordCount(this String Text)
+        public static int WordCount(this string Text)
         {
             _AHK ahk = new _AHK();
             return ahk.WordCount(Text);
@@ -9029,6 +9031,21 @@ namespace StringExtension
             ID = ahk.StringReplace(ID, "http://imdb.com/title/");
             ID = ahk.StringReplace(ID, "/");
             return ID;
+        }
+
+        /// <summary>Formats Quotes to be compatible with SQL/SQLite Insert/Update Commands</summary>
+        /// <param name="TextForSQL">String to Ensure is Formatted for SQL</param>
+        /// <returns>Returns string with quotes fixed for compatibility with SQL commands</returns>
+        public static string ToSQL(this object TextForSQL)
+        {
+            return TextForSQL.ToString().Replace("'", "''");
+        }
+        /// <summary>Formats Quotes to be compatible with SQL/SQLite Insert/Update Commands</summary>
+        /// <param name="TextForSQL">String to Ensure is Formatted for SQL</param>
+        /// <returns>Returns string with quotes fixed for compatibility with SQL commands</returns>
+        public static string ToSQL(this string TextForSQL)
+        {
+            return TextForSQL.ToString().Replace("'", "''");
         }
 
         #endregion
