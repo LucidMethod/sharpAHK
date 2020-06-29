@@ -48,6 +48,23 @@ namespace AutoHotkey.Interop
         }
 
         /// <summary>
+        /// Determines whether state is "Ready" or not (thanks to burque505)
+        /// </summary>
+        /// <param>No parameters</param>
+        /// <returns>Returns true if the state is "Ready", otherwise false</returns>
+        public bool IsReady()
+        {
+            if (AutoHotkeyDll.ahkReady() == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Evaulates an expression or function and returns the results
         /// </summary>
         /// <param name="code">The code to execute</param>

@@ -79,8 +79,6 @@ namespace sharpAHK
 
 
 
-
-
         /// <summary>Clicks or holds down a mouse button, or turns the mouse wheel.</summary>
         /// <param name="button">The button to click: Left (default), Right, Middle (or just the first letter of each of these); or the fourth or fifth mouse button (X1 or X2), which are supported on Windows 2000/XP or later. For example: MouseClick, X1. This parameter may be omitted, in which case it defaults to Left. | Rotate the mouse wheel: On Windows NT/2000/XP or later, specify WheelUp or WU to turn the wheel upward (away from you); specify WheelDown or WD to turn the wheel downward (toward you). In v1.0.48+, specify WheelLeft (or WL) or WheelRight (or WR) to push the wheel left or right, respectively (but these have no effect on operating systems older than Windows Vista). ClickCount is the number of notches to turn the wheel.</param>
         /// <param name="X">The x/y coordinates to which the mouse cursor is moved prior to clicking, which can be expressions. Coordinates are relative to the active window unless CoordMode was used to change that. If omitted, the cursor's current position is used.</param>
@@ -91,6 +89,11 @@ namespace sharpAHK
         /// <param name="R">If this parameter is the letter R, the X and Y coordinates will be treated as offsets from the current mouse position. In other words, the cursor will be moved from its current position by X pixels to the right (left if negative) and Y pixels down (up if negative).</param>
         public void MouseClick(MouseButton button = MouseButton.Left, object X = null, object Y = null, bool ScreenCoordMode = true, object ClickCount = null, object Speed = null, MouseState state = MouseState.None, bool Relative = false)
         {
+            if (X == null) { X = ""; }
+            if (Y == null) { Y = ""; }
+            if (ClickCount == null) { ClickCount = "1"; }
+            if (Speed == null) { Speed = ""; }
+
             string R = "";
             if (Relative) { R = "R"; }
 

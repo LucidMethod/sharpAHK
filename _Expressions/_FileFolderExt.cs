@@ -780,7 +780,7 @@ namespace AHKExpressions
             keys = keys.ToLower(); keys = AHKExpressions.ToTitleCase(keys);
 
 
-            List<string> keywords = StringSplit_List(keys, " ");
+            List<string> keywords = StringSplit(keys, " ");
 
             return keywords;
         }

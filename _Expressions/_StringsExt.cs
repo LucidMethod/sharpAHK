@@ -369,7 +369,7 @@ namespace AHKExpressions
         /// <param name="InText"> </param>
         /// <param name="InsertText"> </param>
         /// <param name="Position"> </param>
-        public static string Insert_Text(this string InText, string InsertText, int Position)
+        public static string Insert(this string InText, string InsertText, int Position)
         {
             _AHK ahk = new _AHK();
             return ahk.Insert_Text(InText, InsertText, Position);
@@ -387,10 +387,13 @@ namespace AHKExpressions
             return ahk.StringSplit(InText, SplitChar, ReturnPos, ReturnLast, NoBlanks);
         }
 
-        /// <summary>Split string by character, Returns List of values separated by the SplitChar</summary>
-        /// <param name="InText">Text to split</param>
+        /// <summary>
+        /// Split string by character, Returns List of values separated by the SplitChar
+        /// </summary>
+        /// <param name="InText"></param>
         /// <param name="SplitChar">Character(s) to split string by</param>
-        public static List<string> StringSplit_List(this string InText, string SplitChar = "(")
+        /// <returns>Returns List of Items separated by SplitChar</returns>
+        public static List<string> StringSplit(this string InText, string SplitChar = "(")
         {
             _AHK ahk = new _AHK();
             return ahk.StringSplit_List(InText, SplitChar);
@@ -416,30 +419,66 @@ namespace AHKExpressions
         }
 
         /// <summary>Returns number of leading spaces before text begins</summary>
-        /// <param name="InText"> </param>
+        /// <param name="InText"></param>
         public static int LeadingSpaceCount(this string InText)
         {
             _AHK ahk = new _AHK();
             return ahk.LeadingSpaceCount(InText);
         }
 
-        /// <summary>convert string to Proper casing -- Output: This Is A String Test</summary>
-        /// <param name="InText"> </param>
+        /// <summary>Converts string to Proper Casing -- Output: This Is A String Test</summary>
+        /// <param name="InText">Text to Convert</param>
         public static string ToTitleCase(this string InText)
         {
             _AHK ahk = new _AHK();
             return ahk.ToTitleCase(InText);
         }
 
+        // was: Closest_FileName
+
         /// <summary>Search list for Contains match - otherwise take close word match</summary>
         /// <param name="SearchTerm"> </param>
         /// <param name="SearchList"> </param>
-        /// <param name="Debug"> </param>
-        public static string Closest_FileName(this string SearchTerm, List<string> SearchList, bool Debug = false)
+        /// <param name="Debug"> </param> 
+        public static string CloseMatch(this string SearchTerm, List<string> SearchList, bool Debug = false)
         {
             _AHK ahk = new _AHK();
             return ahk.Closest_FileName(SearchTerm, SearchList, Debug);
         }
+
+        /// <summary>
+        /// Returns True if File Path is Valid 
+        /// </summary>
+        /// <param name="FilePath"></param>
+        /// <returns></returns>
+        public static bool FileExists(this string FilePath)
+        {
+            return File.Exists(FilePath); 
+        }
+
+
+        /// <summary>
+        /// Gets whether the specified Uri is a universal naming convention (UNC) path.
+        /// </summary>
+        /// <param name="FilePath"></param>
+        /// <returns></returns>
+        public static bool IsUNC(this string FilePath)
+        {
+            Uri address = new Uri(FilePath);
+            return address.IsUnc;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the specified Uri is a file URI.
+        /// </summary>
+        /// <param name="FilePath"></param>
+        /// <returns></returns>
+        public static bool IsFile(this string FilePath)
+        {
+            Uri address = new Uri(FilePath);
+            return address.IsFile;
+        }
+
 
         /// <summary>Find the closest match in a list to search word</summary>
         /// <param name="SearchWord"> </param>
@@ -459,27 +498,27 @@ namespace AHKExpressions
         }
 
         /// <summary>
-        /// Encodes Title Text into Database Compatible Storage
+        /// Encodes Text into Database Compatible Storage
         /// </summary>
-        /// <param name="TitleText"></param>
+        /// <param name="Text"></param>
         /// <returns></returns>
-        public static string Encode(this string TitleText)
+        public static string Encode(this string Text)
         {
-            if (TitleText == null) { return ""; }
-            var encoded = System.Web.HttpUtility.HtmlEncode(TitleText);
+            if (Text == null) { return ""; }
+            var encoded = System.Web.HttpUtility.HtmlEncode(Text);
             return encoded.ToString();
         }
 
         /// <summary>
-        /// Decodes Encoded Text into Display Text
+        /// Decodes HTML Encoded Text into Readable Text
         /// </summary>
-        /// <param name="TitleText"></param>
+        /// <param name="Text"></param>
         /// <returns></returns>
-        public static string Decode(this string TitleText)
+        public static string Decode(this string Text)
         {
-            if (TitleText == null) { return ""; }
+            if (Text == null) { return ""; }
             StringWriter myWriter = new StringWriter();
-            System.Web.HttpUtility.HtmlDecode(TitleText, myWriter);  // Decode the encoded string.
+            System.Web.HttpUtility.HtmlDecode(Text, myWriter);  // Decode the encoded string.
             return myWriter.ToString();
         }
 
@@ -510,7 +549,7 @@ namespace AHKExpressions
         /// </summary>
         /// <param name="URL">IMDb.com URL to Parse</param>
         /// <returns>Return IMDb ID</returns>
-        public static string IMDb_ID_FromURL(this string URL)
+        public static string IMDbID(this string URL)
         {
             _AHK ahk = new _AHK();
             string ID = URL;
@@ -535,21 +574,30 @@ namespace AHKExpressions
         }
 
         /// <summary>Converts text from a text file to list <string>
-        /// <param name="TextString">Text String To Parse By New Line Into List Return</param>
+        /// <param name="Input">Either Text String of Valid Text File Path</param>
         /// <param name="SkipBlankLines">Option To Skip Blank Lines in List Return</param>
         /// <param name="Trim">Option To Trim Each Line</param>
         /// <param name="SkipCommentLines">Skip Lines Starting with '//' (For Excluding C# Comments)</param>
-        public static List<string> ToList(this string TextString, bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = true)
+        public static List<string> ToList(this string Input, string SplitChar = "NewLine", bool SkipBlankLines = true, bool Trim = true, bool SkipCommentLines = false)
         {
             _AHK ahk = new _AHK();
             List<string> list = new List<string>();
+            if (Input == null) { return list; }
 
-            if (TextString == null) { return list; }
+            if (Input.CharCount() < 259) // valid number of chars for a file path
+            {
+                if (Input.IsFile()) { if (File.Exists(Input)) { Input = ahk.FileRead(Input); } }
+                
+                if (Input.IsDir())
+                {
+                    if (Directory.Exists(Input)) { return DirList(Input, "*.*", true, true); }
+                }
+            }
 
-            // parse by new line
+            if (SplitChar == "NewLine" || SplitChar == "\n" || SplitChar == "\r" || SplitChar == "\n\r")
             {
                 // Creates new StringReader instance from System.IO
-                using (StringReader reader = new StringReader(TextString))
+                using (StringReader reader = new StringReader(Input))
                 {
                     // Loop over the lines in the string.
                     string line;
@@ -570,11 +618,24 @@ namespace AHKExpressions
                         list.Add(writeline);
                     }
                 }
-
+            }
+            else
+            {
+                return ahk.StringSplit_List(Input, SplitChar, SkipBlankLines); 
             }
             return list;
         }
 
+
+        /// <summary>
+        /// Returns the Number of Characters in a String
+        /// </summary>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static int CharCount(this string Text)
+        {
+            return Text.Length; 
+        }
 
         #region === ObjectStrings ===
 

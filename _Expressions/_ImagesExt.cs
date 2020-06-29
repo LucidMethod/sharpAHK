@@ -15,38 +15,6 @@ namespace AHKExpressions
     {
         // === Images ===
 
-        /// <summary>Convert LocalFilePath with ImageLocation to Image</summary>
-        /// <param name="FilePath"> </param>
-        public static Image ToImg(this string FilePath)
-        {
-            _AHK ahk = new _AHK();
-
-            if (ahk.isImage(FilePath))
-            {
-                if (File.Exists(FilePath))
-                {
-                    return Image.FromFile(FilePath);  // works but locks filestream
-
-
-                    /*
-                                    if (IsImage(FilePath))
-                                    {
-                                        using (Image im = Image.FromFile(FilePath))
-                                        {
-                                            Bitmap bm = new Bitmap(im);
-                                            return bm;
-                                        }
-                                    }
-                    */
-                }
-            }
-
-
-            //ahk.MsgBox(path + "\r\nNot Found - Unable to Load Image");
-            return null;
-        }
-
-
         /// <summary>Convert Image Path To Icon</summary>
         /// <param name="ImagePath"> </param>
         /// <param name="ICOSize">Size of Icon to Create (default = 64) </param>
@@ -112,90 +80,155 @@ namespace AHKExpressions
         //    return null;
         //}
 
-        /// <summary>Convert Image Path (png, ico, exe) / Icon / ImageList (By Key) Item / or Returns Image if Provided</summary>
-        /// <param name="Image"> </param>
-        /// <param name="KeyName"> </param>
-        public static Image ToImage(this object Image, int width = 0, int height = 0, string KeyName = "")
+        ///// <summary>Convert Image Path (png, ico, exe) / Icon / ImageList (By Key) Item / or Returns Image if Provided</summary>
+        ///// <param name="Image"> </param>
+        ///// <param name="KeyName"> </param>
+        //public static Image ToImage(this object Image, int width = 0, int height = 0, string KeyName = "")
+        //{
+        //    if (Image == null) { return null; }
+
+        //    string VarType = Image.GetType().ToString();  //determine what kind of variable was passed into function
+
+        //    if (VarType == "System.String")  // Image File Path
+        //    {
+        //        if (!File.Exists((string)Image)) { return null; }
+
+        //        // check the file extension of the file passed in 
+        //        string fileExt = FileExt((string)Image, true);
+
+        //        if (fileExt.ToUpper() == ".EXE") // extract default image from exe 
+        //        {
+        //            Icon a = Icon.ExtractAssociatedIcon((string)Image);
+        //            Image returnImage = ToImage(a);  // convert icon to image
+        //            return returnImage;  // return image
+        //        }
+
+        //        // otherwise read image file path and convert to image and return
+        //        Image fileImage = GetCopyImage((string)Image);
+
+        //        // resize image if user provided w/h
+        //        if (width != 0 && height != 0)
+        //        {
+        //            fileImage = Resize((string)Image, width, height);
+        //        }
+
+        //        return fileImage;
+        //    }
+        //    if (VarType == "System.Drawing.Icon")  // Icon
+        //    {
+        //        Icon ico = (Icon)Image;
+        //        return ico.ToBitmap();
+        //    }
+        //    if (VarType == "System.Drawing.Bitmap")  // Image (returns same image unchanged)
+        //    {
+        //        return (Image)Image;
+        //    }
+        //    if (VarType == "System.Windows.Forms.ImageList")  // ImageList
+        //    {
+        //        return ToImage((ImageList)Image, KeyName);  // return image from image list by key
+        //    }
+
+        //    return null;
+        //}
+
+        /// <summary>
+        /// Convert Bitmap to System.Drawing.Image 
+        /// </summary>
+        /// <param name="Image"></param>
+        /// <returns></returns>
+        public static Image ToImage(this Bitmap Image)
         {
-            string VarType = Image.GetType().ToString();  //determine what kind of variable was passed into function
+            if (Image == null) { return null; }
+            return (Image)Image;
+        }
 
-            if (VarType == "System.String")  // Image File Path
+        /// <summary>
+        /// Convert Icon Obj to System.Drawing.Image 
+        /// </summary>
+        /// <param name="icon"></param>
+        /// <returns></returns>
+        public static Image ToImage(this Icon icon)
+        {
+            if (icon == null) { return null; }
+            //if (icon.GetType().ToString() == "System.Drawing.Icon")  // Icon
+            Icon ico = (Icon)icon;
+            return ico.ToBitmap();
+        }
+
+
+        /// <summary>
+        /// Convert Image File Path or EXE FilePath to System.Drawing.Image 
+        /// </summary>
+        /// <param name="FilePath">Image File or EXE Containing Icon</param>
+        /// <param name="Width">New Image Width</param>
+        /// <param name="Height">New Image Height</param>
+        /// <returns></returns>
+        public static Image ToImage(this string FilePath, int Width=0, int Height=0)
+        {
+            if (!File.Exists(FilePath)) { return null; }
+
+            // check the file extension of the file passed in 
+            if (FileExt((string)FilePath, true).ToUpper() == ".EXE") // extract default image from exe 
             {
-                if (!File.Exists((string)Image)) { return null; }
+                Icon a = Icon.ExtractAssociatedIcon((string)FilePath);
+                Image returnImage = ToImage(a);  // convert icon to image
 
-                // check the file extension of the file passed in 
-                string fileExt = FileExt((string)Image, true);
+                if (Width != 0 || Height != 0) { return returnImage.Resize(Width, Height); }
 
-                if (fileExt.ToUpper() == ".EXE") // extract default image from exe 
-                {
-                    Icon a = Icon.ExtractAssociatedIcon((string)Image);
-                    Image returnImage = ToImage(a);  // convert icon to image
-                    return returnImage;  // return image
-                }
-
-                // otherwise read image file path and convert to image and return
-                Image fileImage = GetCopyImage((string)Image);
-
-                // resize image if user provided w/h
-                if (width != 0 && height != 0)
-                {
-                    fileImage = ResizeImage((string)Image, width, height);
-                }
-
-                return fileImage;
+                return returnImage;  // return image
             }
-            if (VarType == "System.Drawing.Icon")  // Icon
+            else
             {
-                Icon ico = (Icon)Image;
-                return ico.ToBitmap();
+                if (FilePath.IsImage()) { return System.Drawing.Image.FromFile(FilePath);  }
             }
-            if (VarType == "System.Drawing.Bitmap")  // Image (returns same image unchanged)
-            {
-                return (Image)Image;
-            }
-            if (VarType == "System.Windows.Forms.ImageList")  // ImageList
-            {
-                return From_ImageList((ImageList)Image, KeyName);  // return image from image list by key
-            }
-
+            
             return null;
         }
 
-        /// <summary>search imagelist for key (file name) - returns image</summary>
-        /// <param name="ImageList IL"> </param>
-        /// <param name="KeyName"> </param>
-        public static Image From_ImageList(this ImageList IL, string KeyName = "png_arrow-down-icon.png")
+
+        /// <summary>Search imagelist for key (file name) - returns image</summary>
+        /// <param name="IL">ImageList to Return Value From</param>
+        /// <param name="KeyName">ImageList Key Name</param>
+        /// <param name="Width">New Image Width</param>
+        /// <param name="Height">New Image Height</param>
+        public static Image ToImage(this ImageList IL, string KeyName = "png_arrow-down-icon.png", int Width = 0, int Height = 0)
         {
-            List<string> imageList = ImageList_FileNames(IL);
+            List<string> imageList = FileNames(IL);
 
             foreach (string image in imageList)
             {
                 string img = FileName(image);
                 if (KeyName == img)
                 {
-                    return GetCopyImage(image);
+                    Image ime = GetCopyImage(image);
+                    if (Width != 0 || Height != 0) { return ime.Resize(Width, Height); }
+                    return ime;
                 }
-
                 img = FileNameNoExt(image);
                 if (KeyName == img)
                 {
-                    return GetCopyImage(image);
+                    Image ime = GetCopyImage(image);
+                    if (Width != 0 || Height != 0) { return ime.Resize(Width, Height); }
+                    return ime;
                 }
-
                 if (image.Contains(KeyName))
                 {
-                    return GetCopyImage(image);
+                    Image ime = GetCopyImage(image);
+                    if (Width != 0 || Height != 0) { return ime.Resize(Width, Height); }
+                    return ime;
                 }
             }
 
             return null;
         }
 
+        
+        
         /// <summary>return list of key names (also the filename without ext) in ImageList</summary>
         /// <param name="ImageList IL"> </param>
         /// <param name="FileNameOnly"> </param>
         /// <param name="FileExt"> </param>
-        public static List<string> ImageList_FileNames(this ImageList IL, bool FileNameOnly = false, bool FileExt = false)
+        public static List<string> FileNames(this ImageList IL, bool FileNameOnly = false, bool FileExt = false)
         {
             List<string> ImageListKeys = new List<string>();
 
@@ -226,8 +259,8 @@ namespace AHKExpressions
         }
 
 
-        /// <summary>copy image before loading, frees file to delete</summary>
-        /// <param name="path"> </param>
+        /// <summary>Copy Image Before Loading, Frees File to Delete</summary>
+        /// <param name="path">FilePath to Image to Load Copy Of</param>
         public static Image GetCopyImage(this string path)
         {
             if (File.Exists(path))
@@ -253,15 +286,81 @@ namespace AHKExpressions
         }
 
         /// <summary>resize image (untested)</summary>
-        /// <param name="newWidth"> </param>
-        /// <param name=" newHeight"> </param>
-        /// <param name=" stPhotoPath"> </param>
-        public static Image ResizeImage(this string ImagePath, int newWidth, int newHeight)
+        /// <param name="ImagePath"> </param>
+        /// <param name="Width">New Image Width</param>
+        /// <param name="Height">New Image Height</param>
+        public static Image Resize(this string ImagePath, int Width, int Height)
         {
             Image imgPhoto = Image.FromFile(ImagePath);
 
             int sourceWidth = imgPhoto.Width;
             int sourceHeight = imgPhoto.Height;
+
+            //Consider vertical pics
+            if (sourceWidth < sourceHeight)
+            {
+                int buff = Width;
+
+                Width = Height;
+                Height = buff;
+            }
+
+            int sourceX = 0, sourceY = 0, destX = 0, destY = 0;
+            float nPercent = 0, nPercentW = 0, nPercentH = 0;
+
+            nPercentW = ((float)Width / (float)sourceWidth);
+            nPercentH = ((float)Height / (float)sourceHeight);
+            if (nPercentH < nPercentW)
+            {
+                nPercent = nPercentH;
+                destX = System.Convert.ToInt16((Width -
+                          (sourceWidth * nPercent)) / 2);
+            }
+            else
+            {
+                nPercent = nPercentW;
+                destY = System.Convert.ToInt16((Height -
+                          (sourceHeight * nPercent)) / 2);
+            }
+
+            int destWidth = (int)(sourceWidth * nPercent);
+            int destHeight = (int)(sourceHeight * nPercent);
+
+
+            Bitmap bmPhoto = new Bitmap(Width, Height,
+                          PixelFormat.Format24bppRgb);
+
+            bmPhoto.SetResolution(imgPhoto.HorizontalResolution,
+                         imgPhoto.VerticalResolution);
+
+            Graphics grPhoto = Graphics.FromImage(bmPhoto);
+            grPhoto.Clear(Color.Black);
+            grPhoto.InterpolationMode =
+                System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+
+            grPhoto.DrawImage(imgPhoto,
+                new Rectangle(destX, destY, destWidth, destHeight),
+                new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight),
+                GraphicsUnit.Pixel);
+
+            grPhoto.Dispose();
+            imgPhoto.Dispose();
+            return bmPhoto;
+        }
+
+        /// <summary>
+        /// Resize Image Object (untested)
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="newWidth"></param>
+        /// <param name="newHeight"></param>
+        /// <returns></returns>
+        public static Image Resize(this Image image, int newWidth, int newHeight)
+        {
+            //Image imgPhoto = Image.FromFile(ImagePath);
+
+            int sourceWidth = image.Width;
+            int sourceHeight = image.Height;
 
             //Consider vertical pics
             if (sourceWidth < sourceHeight)
@@ -297,21 +396,21 @@ namespace AHKExpressions
             Bitmap bmPhoto = new Bitmap(newWidth, newHeight,
                           PixelFormat.Format24bppRgb);
 
-            bmPhoto.SetResolution(imgPhoto.HorizontalResolution,
-                         imgPhoto.VerticalResolution);
+            bmPhoto.SetResolution(image.HorizontalResolution,
+                         image.VerticalResolution);
 
             Graphics grPhoto = Graphics.FromImage(bmPhoto);
             grPhoto.Clear(Color.Black);
             grPhoto.InterpolationMode =
                 System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 
-            grPhoto.DrawImage(imgPhoto,
+            grPhoto.DrawImage(image,
                 new Rectangle(destX, destY, destWidth, destHeight),
                 new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight),
                 GraphicsUnit.Pixel);
 
             grPhoto.Dispose();
-            imgPhoto.Dispose();
+            image.Dispose();
             return bmPhoto;
         }
 
@@ -330,6 +429,8 @@ namespace AHKExpressions
             if (extension == ".ICO") { FormatAccepted = true; }
             if (extension == ".JPG") { FormatAccepted = true; }
             if (extension == ".JPEG") { FormatAccepted = true; }
+            if (extension == ".ICO") { FormatAccepted = true; }
+            if (extension == ".ICON") { FormatAccepted = true; }
 
             return FormatAccepted;
         }
@@ -337,12 +438,12 @@ namespace AHKExpressions
         /// <summary>
         /// Returns Image's Width
         /// </summary>
-        /// <param name="FilePath">Path to Image</param>
+        /// <param name="ImageFilePath">Path to Image</param>
         /// <returns></returns>
-        public static int ImageWidth(this string FilePath)
+        public static int ImageWidth(this string ImageFilePath)
         {
             _AHK ahk = new _AHK();
-            Image Bmap = ToImage(FilePath);
+            Image Bmap = ToImage(ImageFilePath);
 
             //Bitmap Bmap = Image.FromFile(FilePath);
             //int BmH = Bmap.Height;
@@ -355,17 +456,15 @@ namespace AHKExpressions
         /// <summary>
         /// Returns Image's Height
         /// </summary>
-        /// <param name="FilePath">Path to Image</param>
+        /// <param name="ImageFilePath">Path to Image</param>
         /// <returns></returns>
-        public static int ImageHeight(this string FilePath)
+        public static int ImageHeight(this string ImageFilePath)
         {
-            Image Bmap = ToImage(FilePath);
-
+            Image Bmap = ToImage(ImageFilePath);
             //Bitmap Bmap = Image.FromFile(FilePath);
             int BmH = Bmap.Height;
             //int BmW = Bmap.Width;
             Bmap.Dispose(); // Avoid Out of Memory errors
-
             return BmH;
         }
 

@@ -1,7 +1,9 @@
 ﻿using sharpAHK;
+using StringExtension;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -36,25 +38,106 @@ namespace AHKExpressions
         /// <param name="LIST">List of strings to add new distinct item to</param>
         /// <param name="AddItem">Item to add to LIST if not already in LIST</param>
         /// <param name="CaseSensitive">Determines whether AddItem value must match LIST item's case exactly before excluding as existing item. False would add "haVe" and "HAVe" as different item values.</param>
-        public static List<string> ListADD(this List<string> LIST, string AddItem, bool CaseSensitive = false)
+        public static List<string> Add(this List<string> LIST, string AddItem, bool CaseSensitive = false, bool OnlyDistinct = false)
         {
+            if (AddItem == null) { return LIST; }
+
             if (LIST.Count > 0)
             {
                 bool FoundInList = InLIST(LIST, AddItem, CaseSensitive);
-                if (!FoundInList) { LIST.Add(AddItem); }
-            }
 
-            if (LIST == null || LIST.Count == 0) { LIST.Add(AddItem); }  // list is empty, just add new item
+                if (OnlyDistinct)
+                {
+                    if (!FoundInList) { LIST.Add(AddItem); }
+                }
+                else
+                {
+                    LIST.Add(AddItem);
+                }
+            }
+            else
+            {
+                LIST.Add(AddItem);  // list is empty, just add new item
+            }
 
             return LIST;
         }
+
+        /// <summary>
+        /// Takes List of Items and Returns List of Distinct Items Only (option to sort alpha)
+        /// </summary>
+        /// <param name="OriginalLIST"></param>
+        /// <param name="SortAlpha"></param>
+        /// <returns></returns>
+        public static List<string> Distinct(this List<string> OriginalLIST, bool SortAlpha = false)
+        {
+            List<string> rList = new List<string>();
+
+            _AHK ahk = new _AHK();
+            foreach(string item in OriginalLIST)
+            {
+                if (!ahk.InLIST(OriginalLIST, item)) { rList.Add(item); }
+            }
+
+            if (SortAlpha) { rList = rList.ListSORT(); }
+
+            return rList;
+        }
+
+
+        /// <summary>
+        /// Merges two Lists, Returning Only Distinct List Values
+        /// </summary>
+        /// <param name="OriginalLIST"></param>
+        /// <param name="AddToList"></param>
+        /// <param name="SortAlpha"></param>
+        /// <returns></returns>
+        public static List<string> Distinct(this List<string> OriginalLIST, List<string> AddToList,  bool SortAlpha = false)
+        {
+            List<string> rList = new List<string>();
+            _AHK ahk = new _AHK();
+            foreach (string item in OriginalLIST)
+            {
+                if (!ahk.InLIST(rList, item)) { rList.Add(item); }
+            }
+            foreach (string item in AddToList)
+            {
+                if (!ahk.InLIST(rList, item)) { rList.Add(item); }
+            }
+            if (SortAlpha) { rList = rList.ListSORT(); }
+            return rList;
+        }
+
+
+        /// <summary>
+        /// Returns Only Distinct Values From List, Adds New Item to List if New Distinct Item
+        /// </summary>
+        /// <param name="OriginalLIST"></param>
+        /// <param name="AddToList"></param>
+        /// <param name="SortAlpha"></param>
+        /// <returns></returns>
+        public static List<string> Distinct(this List<string> OriginalLIST, string AddToList, bool SortAlpha = false)
+        {
+            List<string> rList = new List<string>();
+            _AHK ahk = new _AHK();
+            foreach (string item in OriginalLIST)
+            {
+                if (!ahk.InLIST(rList, item)) { rList.Add(item); }
+            }
+            if (!ahk.InLIST(rList, AddToList)) { rList.Add(AddToList); }
+            
+            if (SortAlpha) { rList = rList.ListSORT(); }
+            return rList;
+        }
+
+
 
         /// <summary>Returns List with items containing SearchText</summary>
         /// <param name="LIST">List of items to search for items containing SearchText</param>
         /// <param name="SearchText">Return list of items containg SearchText in list item</param>
         /// <param name="CaseSensitive">Determines list item must contain same case as SearchText before adding to return list</param>
         /// <returns>Returns original list minus excluded items list values</returns>
-        public static List<string> ListSEARCH(this List<string> LIST, string SearchText, bool CaseSensitive = false)
+        public static List<string> Search(this List<string> LIST, string SearchText, bool CaseSensitive = false)
         {
             List<string> returnList = new List<string>();
 
@@ -72,12 +155,14 @@ namespace AHKExpressions
         /// <param name="RemoveItems">List of items to remove from Original List</param>
         /// <param name="CaseSensitive">Determines whether RemoveItem must match item in Original list's case before excluding from return list</param>
         /// <returns>Returns original list minus excluded items list values</returns>
-        public static List<string> ListREMOVE(this List<string> OriginalList, List<string> RemoveItems, bool CaseSensitive = false)
+        public static List<string> Remove(this List<string> OriginalList, List<string> RemoveItems, bool CaseSensitive = false, bool RemoveBlanks = true)
         {
             List<string> returnList = new List<string>();
 
             foreach (string Item in OriginalList)
             {
+                if (RemoveBlanks) { if (Item == "") { continue; } } // skip adding blank values to return list
+
                 bool Add = true;
                 foreach (string eItem in RemoveItems)
                 {
@@ -96,12 +181,14 @@ namespace AHKExpressions
         /// <param name="RemoveItem">List item to remove from existing list</param>
         /// <param name="CaseSensitive">Determines whether RemoveItem must match item in Original list's case before excluding from return list</param>
         /// <returns>Returns list with all items except RemoveItem</returns>
-        public static List<string> ListREMOVE_Item(this List<string> OriginalList, string RemoveItem, bool CaseSensitive = false)
+        public static List<string> Remove(this List<string> OriginalList, string RemoveItem, bool CaseSensitive = false, bool RemoveBlanks = true)
         {
             List<string> returnList = new List<string>();
 
             foreach (string Item in OriginalList)
             {
+                if (RemoveBlanks) { if (Item == "") { continue; } } // skip adding blank values to return list
+
                 bool Add = true;
 
                 if (CaseSensitive) { if (Item.Trim() == RemoveItem.Trim()) { Add = false; } }
@@ -113,11 +200,11 @@ namespace AHKExpressions
             return returnList;
         }
 
-        /// <summary>Return list that does not contain any items with TextToExclude in itemstring</summary>
+        /// <summary>Return list that does not contain any items with 'ExcludeText' in itemstring</summary>
         /// <param name="OriginalList">List of items to search and remove items from</param>
         /// <param name="ExcludeText">Return list excluding items containing this text</param>
         /// <param name="CaseSensitive">Determines whether ExcludeText must be case sensitive match to OriginalList item before removing</param>
-        public static List<string> ListREMOVE_Containing(this List<string> OriginalList, string ExcludeText, bool CaseSensitive = false)
+        public static List<string> RemoveContaining(this List<string> OriginalList, string ExcludeText, bool CaseSensitive = false)
         {
             List<string> NewList = new List<string>();
 
@@ -130,13 +217,35 @@ namespace AHKExpressions
             return NewList;
         }
 
+
+        /// <summary>Return list that does not contain any items in containing text in ExcludeTextList</summary>
+        /// <param name="OriginalList">List of items to search and remove items from</param>
+        /// <param name="ExcludeTextList">List of text to exclude from original list</param>
+        /// <param name="CaseSensitive">Determines whether ExcludeText must be case sensitive match to OriginalList item before removing</param>
+        public static List<string> RemoveContaining(this List<string> OriginalList, List<string> ExcludeTextList, bool CaseSensitive = false)
+        {
+            List<string> NewList = new List<string>();
+
+            foreach (string project in OriginalList)
+            { 
+                foreach(string ExcludeText in ExcludeTextList)
+                {
+                    if (!CaseSensitive) { if (!project.ToUpper().Contains(ExcludeText.ToUpper())) { NewList.Add(project); } }
+                    if (CaseSensitive) { if (!project.Contains(ExcludeText.ToUpper())) { NewList.Add(project); } }
+                }
+            }
+
+            return NewList;
+        }
+
+
         /// <summary>Returns new list merging two lists together, with the option to exclude duplicate items</summary>
         /// <param name="MainList">Existing list to add to</param>
         /// <param name="AddList">List to add to MainList, returning combined list</param>
         /// <param name="ExcludeDuplicates">Option to not add items from AddList already found in MainList</param>
         /// <param name="CaseSensitive">When ExcludeDuplicates is True, determines whether AddList item must match MainList item's case before excluding from merged list</param>
         /// <returns>Returns new list merging two lists together, with the option to exclude duplicate items</returns>
-        public static List<string> ListMERGE(this List<string> MainList, List<string> AddList, bool ExcludeDuplicates = false, bool CaseSensitive = false)
+        public static List<string> Merge(this List<string> MainList, List<string> AddList, bool ExcludeDuplicates = false, bool CaseSensitive = false)
         {
             // Merge two entire lists if not excluding duplicates
             if (!ExcludeDuplicates) { MainList.AddRange(AddList); }
@@ -171,6 +280,22 @@ namespace AHKExpressions
             return OutList;
         }
 
+        /// <summary>Returns list sorted alphabetically</summary>
+        /// <param name="list">List to sort alphabetically</param>
+        public static List<string> SortAlpha(this List<string> list)
+        {
+            if (list == null) { return new List<string>(); } // nothing to sort, return blank list
+
+            string[] s = list.ToArray();
+            Array.Sort(s);
+            List<string> OutList = new List<string>();
+            foreach (string t in s)
+            {
+                OutList.Add(t);
+            }
+
+            return OutList;
+        }
 
 
         // { Needs Testing }  - need to loop again to see if there is anything in B not found in A to add to diffList.. TODO
@@ -189,22 +314,26 @@ namespace AHKExpressions
             return diffList;
         }
 
-        // untested --- aiming for random list shuffle
-        public static List<string> List_Shuffle(this List<string> aList)
+        /// <summary>
+        /// Returns Random List (aka Shuffled)
+        /// </summary>
+        /// <param name="OriginalList">List to Shuffle</param>
+        /// <returns></returns>
+        public static List<string> Shuffle(this List<string> OriginalList)
         {
             System.Random _random = new System.Random();
             List<string> randomList = new List<string>();
 
-            int n = aList.Count;
+            int n = OriginalList.Count;
             for (int i = 0; i < n; i++)
             {
                 int r = i + (int)(_random.NextDouble() * (n - i));
-                randomList.Add(aList[r]);
-                aList[r] = aList[i];
-                aList[i] = aList[r];
+                randomList.Add(OriginalList[r]);
+                OriginalList[r] = OriginalList[i];
+                OriginalList[i] = OriginalList[r];
             }
 
-            return aList;
+            return OriginalList;
         }
 
 
@@ -213,7 +342,7 @@ namespace AHKExpressions
         /// </summary>
         /// <param name="aList"></param>
         /// <returns></returns>
-        public static List<string> reverse(this List<string> aList)
+        public static List<string> Reverse(this List<string> aList)
         {
             List<string> rList = new List<string>();
             if (aList == null) { return rList; }
@@ -1187,11 +1316,276 @@ namespace AHKExpressions
 
         // === Dictionary ===
 
+        //#region === Dictionary Actions ===
+
+        ///// <summary>Sort Dictionary by Value</summary>
+        ///// <param name="dict">Dictionary to Sort</param>
+        ///// <param name="Reverse">Reverses the Alpha Sort from A-Z to Z-A</param>
+        //public static Dictionary<string, string> SortByValue(this Dictionary<string, string> dict, bool Reverse = false)
+        //{
+        //    Dictionary<string, string> returndict = new Dictionary<string, string>();
+
+        //    // Order by values.
+        //    // ... Use LINQ to specify sorting by value.
+        //    var items = from pair in dict
+        //                orderby pair.Value ascending
+        //                select pair;
+
+        //    if (Reverse)
+        //    {
+        //        // Reverse sort.
+        //        // ... Can be looped over in the same way as above.
+        //        items = from pair in dict
+        //                orderby pair.Value descending
+        //                select pair;
+        //    }
+
+        //    // Display results.
+        //    foreach (KeyValuePair<string, string> pair in items)
+        //    {
+        //        //Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
+
+        //        returndict.Add(pair.Key, pair.Value);
+        //    }
+
+        //    return returndict;
+        //}
+
+
+        ///// <summary>Sort Dictionary by Key</summary>
+        ///// <param name="dict">Dictionary to Sort</param>
+        ///// <param name="Reverse">Reverses the Alpha Sort from A-Z to Z-A</param>
+        //public static Dictionary<string, string> SortByKey(this Dictionary<string, string> dict, bool Reverse = false)
+        //{
+        //    Dictionary<string, string> returndict = new Dictionary<string, string>();
+
+        //    // Order by values.
+        //    // ... Use LINQ to specify sorting by value.
+        //    var items = from pair in dict
+        //                orderby pair.Key ascending
+        //                select pair;
+
+        //    if (Reverse)
+        //    {
+        //        // Reverse sort.
+        //        // ... Can be looped over in the same way as above.
+        //        items = from pair in dict
+        //                orderby pair.Key descending
+        //                select pair;
+        //    }
+
+        //    // Display results.
+        //    foreach (KeyValuePair<string, string> pair in items)
+        //    {
+        //        //Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
+
+        //        returndict.Add(pair.Key, pair.Value);
+        //    }
+
+        //    return returndict;
+        //}
+
+
+
+        ///// <summary>Converts Dictionary to DataTable</summary>
+        ///// <param name="dictionary">Dictionary to Convert</param>
+        ///// <param name="KeyField">DataTable Column Header for Key Column</param>
+        ///// <param name="ValueField">DataTable Column Header for Value Column</param>
+        //public static DataTable ToDataTable(this Dictionary<string, string> dictionary, string KeyField = "Key", string ValueField = "Value")
+        //{
+        //    // Here we create a DataTable with four columns.
+        //    DataTable table = new DataTable();
+        //    table.Columns.Add(KeyField, typeof(string));
+        //    table.Columns.Add(ValueField, typeof(string));
+
+        //    // Use var keyword to enumerate dictionary.
+        //    foreach (var pair in dictionary)
+        //    {
+        //        table.Rows.Add(pair.Key, pair.Value);
+        //    }
+
+        //    return table;
+        //}
+
+
+        ///// <summary>
+        ///// Returns Dictionary Value from Key
+        ///// </summary>
+        ///// <param name="Dict"></param>
+        ///// <param name="KeyName"></param>
+        ///// <returns></returns>
+        //public static string Value(this Dictionary<string, string> Dict, string KeyName)
+        //{
+        //    string val = "";
+
+        //    // See whether Dictionary contains this string.
+        //    if (Dict.ContainsKey(KeyName)) { val = Dict[KeyName]; }
+
+        //    return val;
+        //}
+
+        ///// <summary>Returns list<string> of Keys from Dictionary
+        ///// <param name="dictionary"></param>
+        ///// /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
+        //public static List<string> KeyList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
+        //{
+        //    _AHK ahk = new _AHK();
+
+        //    // Get a List of all the Keys.
+        //    List<string> keys = new List<string>(dictionary.Keys);
+
+        //    if (SortAlpha) { keys = ahk.ListSORT(keys); }
+
+        //    return keys;
+        //}
+
+
+        ///// <summary>Returns List of Values from Dictionary </summary>
+        ///// <param name="dictionary"></param>
+        ///// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
+        //public static List<string> ValueList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
+        //{
+        //    _AHK ahk = new _AHK();
+        //    // Get a List of all the values
+        //    List<string> values = new List<string>(dictionary.Values);
+        //    //if (SortAlpha) { values =  values.ListSORT(); }
+        //    return values;
+        //}
+
+
+        //#endregion
+
+
+        #region === Return From Dictionary ===
+
+        
+        public static bool ContainsKey(this Dictionary<string, string> Dict, string KeyName)
+        {
+            // See whether Dictionary contains this string.
+            if (Dict.ContainsKey(KeyName)) { return true; }
+            return false;
+        }
+
+
+        /// <summary>
+        /// Returns Dictionary Value from Key
+        /// </summary>
+        /// <param name="Dict"></param>
+        /// <param name="KeyName"></param>
+        /// <returns></returns>
+        public static string Value(this Dictionary<string, string> Dict, string KeyName)
+        {
+            string val = "";
+
+            // See whether Dictionary contains this string.
+            if (Dict.ContainsKey(KeyName)) { val = Dict[KeyName]; }
+
+            return val;
+        }
+
+        /// <summary>
+        /// Returns List of Keys from Dictionary
+        /// </summary>
+        /// <param name="dictionary"> </param>
+        public static List<string> Keys(this Dictionary<string, string> dictionary)
+        {
+            // Get a List of all the Keys.
+            List<string> keys = new List<string>(dictionary.Keys);
+            return keys;
+        }
+        /// <summary>returns list<int> of Keys from Dictionary </summary>
+        /// <param name="Dictionary<int"> </param>
+        /// <param name=" string> dictionary"> </param>
+        public static List<int> Keys(this Dictionary<int, string> dictionary)
+        {
+            // Get a List of all the Keys.
+            List<int> keys = new List<int>(dictionary.Keys);
+            return keys;
+        }
+        /// <summary>returns list<int> of Keys from Dictionary </summary>
+        /// <param name="Dictionary<int"> </param>
+        /// <param name=" string> dictionary"> </param>
+        public static List<string> Keys(this Dictionary<string, int> dictionary)
+        {
+            // Get a List of all the Keys.
+            List<string> keys = new List<string>(dictionary.Keys);
+            return keys;
+        }
+
+
+
+        /// <summary> Returns list<string> of Values from Dictionary </summary>
+        /// <param name="Dictionary<string"> </param>
+        /// <param name=" string> dictionary"> </param>
+        public static List<string> Values(this Dictionary<string, string> dictionary)
+        {
+            // Get a List of all the values
+            List<string> values = new List<string>(dictionary.Values);
+            return values;
+        }
+
+        /// <summary>returns list<int> of Values from Dictionary </summary>
+        /// <param name="Dictionary<string"> </param>
+        /// <param name=" int> dictionary"> </param>
+        public static List<int> Values(this Dictionary<string, int> dictionary)
+        {
+            // Get a List of all the values
+            List<int> values = new List<int>(dictionary.Values);
+            return values;
+        }
+
+        /// <summary>Converts Dictionary<string,string> to DataTable</summary>
+        /// <param name="Dictionary<string"> </param>
+        /// <param name=" string> dictionary"> </param>
+        /// <param name="KeyField"> </param>
+        /// <param name="ValueField"> </param>
+        public static DataTable ToDataTable(this Dictionary<string, string> dictionary, string KeyField = "Key", string ValueField = "Value")
+        {
+            // Here we create a DataTable with four columns.
+            DataTable table = new DataTable();
+            table.Columns.Add(KeyField, typeof(string));
+            table.Columns.Add(ValueField, typeof(string));
+
+            // Use var keyword to enumerate dictionary.
+            foreach (var pair in dictionary)
+            {
+                table.Rows.Add(pair.Key, pair.Value);
+            }
+
+            return table;
+        }
+
+        /// <summary>Converts Dictionary<int,string> to DataTable</summary>
+        /// <param name="Dictionary<string"> </param>
+        /// <param name=" string> dictionary"> </param>
+        /// <param name="KeyField"> </param>
+        /// <param name="ValueField"> </param>            
+        public static DataTable ToDataTable(this Dictionary<int, string> dictionary, string KeyField = "Key", string ValueField = "Value")
+        {
+            // Here we create a DataTable with four columns.
+            DataTable table = new DataTable();
+            table.Columns.Add(KeyField, typeof(string));
+            table.Columns.Add(ValueField, typeof(string));
+
+            // Use var keyword to enumerate dictionary.
+            foreach (var pair in dictionary)
+            {
+                table.Rows.Add(pair.Key, pair.Value);
+            }
+
+            return table;
+        }
+
+
+        #endregion
+
+
         #region === Dictionary Actions ===
 
-        /// <summary>Sort Dictionary by Value</summary>
-        /// <param name="dict">Dictionary to Sort</param>
-        /// <param name="Reverse">Reverses the Alpha Sort from A-Z to Z-A</param>
+        /// <summary>Sort Dictionary<string, string> by Value</summary>
+        /// <param name="Dictionary<string"> </param>
+        /// <param name=" string> dict"> </param>
+        /// <param name="Reverse"> </param>
         public static Dictionary<string, string> SortByValue(this Dictionary<string, string> dict, bool Reverse = false)
         {
             Dictionary<string, string> returndict = new Dictionary<string, string>();
@@ -1223,9 +1617,10 @@ namespace AHKExpressions
         }
 
 
-        /// <summary>Sort Dictionary by Key</summary>
-        /// <param name="dict">Dictionary to Sort</param>
-        /// <param name="Reverse">Reverses the Alpha Sort from A-Z to Z-A</param>
+        /// <summary>Sort Dictionary<string, string> by Key</summary>
+        /// <param name="Dictionary<string"> </param>
+        /// <param name=" string> dict"> </param>
+        /// <param name="Reverse"> </param>
         public static Dictionary<string, string> SortByKey(this Dictionary<string, string> dict, bool Reverse = false)
         {
             Dictionary<string, string> returndict = new Dictionary<string, string>();
@@ -1257,74 +1652,167 @@ namespace AHKExpressions
         }
 
 
-
-        /// <summary>Converts Dictionary to DataTable</summary>
-        /// <param name="dictionary">Dictionary to Convert</param>
-        /// <param name="KeyField">DataTable Column Header for Key Column</param>
-        /// <param name="ValueField">DataTable Column Header for Value Column</param>
-        public static DataTable ToDataTable(this Dictionary<string, string> dictionary, string KeyField = "Key", string ValueField = "Value")
+        /// <summary>
+        /// Splits One Dictionary into 2 Equal Parts (as equal as possible)
+        /// </summary>
+        /// <param name="urls">Dictionary to Split into 2 Equal Parts (remainder go on last list)</param>
+        /// <param name="dict1"></param>
+        /// <param name="dict2"></param>
+        public static void SplitDict(this Dictionary<string, string> urls, out Dictionary<string, string> dict1, out Dictionary<string, string> dict2)
         {
-            // Here we create a DataTable with four columns.
-            DataTable table = new DataTable();
-            table.Columns.Add(KeyField, typeof(string));
-            table.Columns.Add(ValueField, typeof(string));
+            // divide with no remainder, then add remainder value to last list 
+            int remainder = urls.Count % 2;
+            int totalWithOutRemainder = urls.Count - remainder;
+            int half = totalWithOutRemainder / 2;
 
-            // Use var keyword to enumerate dictionary.
-            foreach (var pair in dictionary)
+            int part1 = half + remainder;
+            int part2 = half;
+
+            Dictionary<string, string> urls1 = new Dictionary<string, string>();
+            Dictionary<string, string> urls2 = new Dictionary<string, string>();
+
+            int counter = 0;
+            foreach (string url in urls.Keys)
             {
-                table.Rows.Add(pair.Key, pair.Value);
+                if (counter < part1) { urls1.Add(url, urls[url]); counter++; continue; }
+                else
+                {
+                    urls2.Add(url, urls[url]); counter++;
+                }
             }
 
-            return table;
-        }
-
-
-        /// <summary>
-        /// Returns Dictionary Value from Key
-        /// </summary>
-        /// <param name="Dict"></param>
-        /// <param name="KeyName"></param>
-        /// <returns></returns>
-        public static string Value(this Dictionary<string, string> Dict, string KeyName)
-        {
-            string val = "";
-
-            // See whether Dictionary contains this string.
-            if (Dict.ContainsKey(KeyName)) { val = Dict[KeyName]; }
-
-            return val;
-        }
-
-        /// <summary>Returns list<string> of Keys from Dictionary
-        /// <param name="dictionary"></param>
-        /// /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
-        public static List<string> KeyList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
-        {
-            _AHK ahk = new _AHK();
-
-            // Get a List of all the Keys.
-            List<string> keys = new List<string>(dictionary.Keys);
-
-            if (SortAlpha) { keys = ahk.ListSORT(keys); }
-
-            return keys;
-        }
-
-
-        /// <summary>Returns List of Values from Dictionary </summary>
-        /// <param name="dictionary"></param>
-        /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
-        public static List<string> ValueList(this Dictionary<string, string> dictionary, bool SortAlpha = false)
-        {
-            _AHK ahk = new _AHK();
-            // Get a List of all the values
-            List<string> values = new List<string>(dictionary.Values);
-            //if (SortAlpha) { values =  values.ListSORT(); }
-            return values;
+            dict1 = urls1;
+            dict2 = urls2;
         }
 
 
         #endregion
+
+
+        #region === Populate Dictionary ===
+
+        /// <summary>
+        /// Returns Dictionary with Full FilePath / FileSize (Bytes)
+        /// </summary>
+        /// <param name="DirPath"></param>
+        /// <param name="SearchPattern"></param>
+        /// <param name="Recurse"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> FileSizeDict(this string DirPath, string SearchPattern = "*.*", bool Recurse = true)
+        {
+            _AHK ahk = new _AHK();
+            Dictionary<string, string> fileDict = new Dictionary<string, string>();
+
+            if (!Directory.Exists(DirPath)) { return null; }
+
+            string[] files = null;
+            if (Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); }
+            if (!Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); }
+
+            foreach (string file in files)  // loop through list of files and write file details to sqlite db
+            {
+                string size = ahk.FileSize(file);
+                fileDict.Add(file, size);
+            }
+
+            return fileDict;
+        }
+
+
+        /// <summary>
+        /// Loop Through List of Directories, Returns Dictionary with FilePath / FileSize (bytes)
+        /// </summary>
+        /// <param name="DirPaths"></param>
+        /// <param name="SearchPattern"></param>
+        /// <param name="Recurse"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> FileSizeDict(this List<string> DirPaths, string SearchPattern = "*.*", bool Recurse = true)
+        {
+            _AHK ahk = new _AHK();
+            Dictionary<string, string> fileDict = new Dictionary<string, string>();
+
+            foreach (string DirPath in DirPaths)
+            {
+                if (!Directory.Exists(DirPath)) { continue; }
+
+                string[] files = null;
+                if (Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.AllDirectories); }
+                if (!Recurse) { files = Directory.GetFiles(DirPath, SearchPattern, System.IO.SearchOption.TopDirectoryOnly); }
+
+                foreach (string file in files)  // loop through list of files and write file details to sqlite db
+                {
+                    string size = ahk.FileSize(file);
+                    fileDict.Add(file, size);
+                }
+            }
+
+            return fileDict;
+        }
+
+
+        /// <summary>Returns Dictionary List of ALL Processes Running on PC - If ProcessName provided then return all processes with that name</summary>
+        /// <param name="ProcessName">Optional parameter to return all processes with this process name</param>
+        /// <param name="SortAlpha">Option to Sort Return List Alphabetically</param>
+        public static Dictionary<string, Process> ProcessDict(bool SortAlpha = true, string ProcessName = "")
+        {
+            Dictionary<string, Process> ProcessList = new Dictionary<string, Process>();
+
+            Process[] processlist = Process.GetProcesses();
+
+            foreach (Process theprocess in processlist)
+            {
+                if (!String.IsNullOrEmpty(theprocess.MainWindowTitle))
+                {
+                    try
+                    {
+                        if (ProcessName == "") { ProcessList.Add(theprocess.MainWindowTitle + "|" + theprocess.Id, theprocess); }  // return all processes if Process Name not provided
+                        if (ProcessName != "") { if (theprocess.ProcessName == ProcessName) { ProcessList.Add(theprocess.MainWindowTitle + "|" + theprocess.Id, theprocess); } } // return all processes if Process Name not provided
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            if (SortAlpha)
+            {
+                bool Reverse = false;
+                Dictionary<string, Process> returndict = new Dictionary<string, Process>();
+
+                // Order by values.
+                // ... Use LINQ to specify sorting by value.
+                var items = from pair in ProcessList
+                            orderby pair.Key ascending
+                            select pair;
+
+                if (Reverse)
+                {
+                    // Reverse sort.
+                    // ... Can be looped over in the same way as above.
+                    items = from pair in ProcessList
+                            orderby pair.Key descending
+                            select pair;
+                }
+
+                // Display results.
+                foreach (KeyValuePair<string, Process> pair in items)
+                {
+                    //Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
+
+                    returndict.Add(pair.Key, pair.Value);
+                }
+
+                ProcessList = returndict;
+            }
+
+            return ProcessList;
+        }
+
+
+
+        #endregion
+
+
 
 
     }

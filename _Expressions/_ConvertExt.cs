@@ -26,9 +26,7 @@ namespace AHKExpressions
         /// <returns>Returns INT Variable Type From Input String/Bool/IntPtr</returns>
         public static int ToInt(this object Input)
         {
-
             //MsgBox("Input: " + Input.ToString());
-
             string VarType = Input.GetType().ToString();  //determine what kind of variable was passed into function
             int Out = 0;
 
@@ -104,6 +102,21 @@ namespace AHKExpressions
 
             return Out;
         }
+
+        /// <summary>
+        /// Convert Int32 to Int 
+        /// </summary>
+        /// <param name="Input"></param>
+        /// <returns></returns>
+        public static int ToInt(this Int32 Input)
+        {
+            string VarType = Input.GetType().ToString();  //determine what kind of variable was passed into function
+            int Out = 0;
+            try { Out = (int)Input; } catch { }
+            return Out;
+        }
+
+
 
         /// <summary>convert string / int to IntPtr</summary>
         /// <param name="object Input"> </param>
