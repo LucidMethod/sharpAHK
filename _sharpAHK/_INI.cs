@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,6 +37,9 @@ namespace sharpAHK
         /// <param name="Default">The value to store in OutputVar if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.</param>
         public string IniRead(string IniPath, string Section, string Key, string Default = "")
         {
+            if (!File.Exists(IniPath)) { return ""; }
+
+
             string filename = IniPath.Replace(",", "`,");
             string section = Section.Replace(",", "`,");
             string key = Key.Replace(",", "`,");
@@ -47,7 +51,7 @@ namespace sharpAHK
             ErrorLog_Setup(true, "Error Reading INI: " + filename); // ErrorLevel Detection Enabled for this function in AHK 
             string OutVar = Execute(AHKLine, "OutputVar");   // execute AHK code and return variable value 
 
-            if (ahkGlobal.ErrorLevel) { throw new System.InvalidOperationException(ahkGlobal.ErrorLevelMsg); }  // throw exception on AHK error
+            //if (ahkGlobal.ErrorLevel) { throw new System.InvalidOperationException(ahkGlobal.ErrorLevelMsg); }  // throw exception on AHK error
             return OutVar;
         }
 

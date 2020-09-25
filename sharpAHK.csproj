@@ -71,6 +71,28 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>bin\Debug\sharpAHK.XML</DocumentationFile>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>bin\Release\sharpAHK.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
@@ -103,6 +125,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="lib\Util\SafeLibraryHandle.cs" />
+    <Compile Include="Util\Pipes\MessageHandlerPipeServer.cs" />
+    <Compile Include="Util\Pipes\NamedPipeServer.cs" />
+    <Compile Include="Util\Pipes\PipesModuleLoader.cs" />
     <Compile Include="_Expressions\AutoHotkeyExt.cs" />
     <Compile Include="_Expressions\_ClipboardExt.cs" />
     <Compile Include="_Expressions\_ControlsExt.cs" />
@@ -160,6 +185,9 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <EmbeddedResource Include="lib\AutoHotkey\AutoHotkey.chm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -167,9 +195,17 @@
     </None>
     <EmbeddedResource Include="lib\Util\x86\v2_AutoHotkey.dll" />
     <None Include="sharpAHK.csproj.nuspec" />
+    <None Include="Util\Pipes\pipeclient.ahk" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="Util\x64\AutoHotkey.dll" />
+    <Content Include="Util\x64\v2_AutoHotkey.dll" />
+    <Content Include="Util\x86\AutoHotkey.dll" />
+    <Content Include="Util\x86\v2_AutoHotkey.dll" />
+    <EmbeddedResource Include="lib\AutoHotkey\AutoHotkey.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <Content Include="sharpAHK.csproj.vspscc" />
   </ItemGroup>
   <ItemGroup>
@@ -183,6 +219,7 @@
     <Analyzer Include="packages\Microsoft.NetFramework.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
     <Analyzer Include="packages\Microsoft.NetFramework.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

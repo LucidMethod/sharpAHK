@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -280,9 +281,10 @@ namespace AHKExpressions
             return OutList;
         }
 
-        /// <summary>Returns list sorted alphabetically</summary>
-        /// <param name="list">List to sort alphabetically</param>
-        public static List<string> SortAlpha(this List<string> list)
+        /// <summary>Returns List Sorted Alphabetically</summary>
+        /// <param name="list">List to Sort Alphabetically (A-Z)</param>
+        /// <param name="ReverseOrder">Option to Reverse Order of Alpha List (Z-A)</param>
+        public static List<string> SortAlpha(this List<string> list, bool ReverseOrder = false)
         {
             if (list == null) { return new List<string>(); } // nothing to sort, return blank list
 
@@ -293,6 +295,8 @@ namespace AHKExpressions
             {
                 OutList.Add(t);
             }
+
+            if (ReverseOrder) { return Reverse(OutList); }
 
             return OutList;
         }
@@ -556,7 +560,7 @@ namespace AHKExpressions
         /// <param name="TextString"> </param>
         /// <param name="SkipBlankLines"> </param>
         /// <param name="SkipCommentLines"> </param>
-        public static List<int> ToListInt(this int INT, bool SkipBlankLines = true, bool SkipCommentLines = true)
+        public static List<int> toList(this int INT, bool SkipBlankLines = true, bool SkipCommentLines = true)
         {
             List<int> list = new List<int>();
             bool Trim = true;
@@ -666,7 +670,7 @@ namespace AHKExpressions
         /// <summary>Returns list of Dictionary Keys <int></summary>
         /// <param name="Dictionary<int"> </param>
         /// <param name=" string> dictionary"> </param>
-        public static List<int> Dict_KeyListInt(this Dictionary<int, string> dictionary)
+        public static List<int> Dict_KeyList(this Dictionary<int, string> dictionary)
         {
             // Get a List of all the Keys.
             List<int> keys = new List<int>(dictionary.Keys);
@@ -686,7 +690,7 @@ namespace AHKExpressions
         /// <summary>Returns list of Dictionary Values <string></summary>
         /// <param name="Dictionary<string"> </param>
         /// <param name=" int> dictionary"> </param>
-        public static List<int> Dict_ValueListInt(this Dictionary<string, int> dictionary)
+        public static List<int> Dict_ValueList(this Dictionary<string, int> dictionary)
         {
             // Get a List of all the values
             List<int> returnlist = new List<int>(dictionary.Values);
@@ -961,6 +965,153 @@ namespace AHKExpressions
         }
 
 
+        /// <summary>
+        /// Regex Image Links from HTML to List
+        /// </summary>
+        /// <param name="HTML"></param>
+        /// <returns></returns>
+        public static List<string> ImageLinks(this string HTML)
+        {
+            List<string> matches = new List<string>();
+
+            if (HTML == null || HTML.Trim() == "") { return matches; }
+
+            string cmd = @"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?";
+
+            Regex ItemRegex = new Regex(cmd, RegexOptions.IgnoreCase);
+            foreach (Match ItemMatch in ItemRegex.Matches(HTML))
+            {
+                //Console.WriteLine(ItemMatch);
+                string val = ItemMatch.Value;
+
+                if (val.ToUpper().Contains(".JPG") || val.ToUpper().Contains(".JPEG") || val.ToUpper().Contains(".PNG"))
+                {
+                    //ahk.MsgBox(val); 
+                    matches.Add(val);
+                }
+            }
+            return matches;
+        }
+
+        /// <summary>
+        /// Parse Standard URL For FileName at End of Path
+        /// </summary>
+        /// <param name="urlLink">URL to Parse</param>
+        /// <returns>Returns Last Section of URL - Usually File Name</returns>
+        public static string LinkFileName(this string urlLink)
+        {
+            _AHK ahk = new _AHK();
+            return ahk.StringSplit(urlLink, "/", 0, true);
+        }
+
+
+        /// <summary>
+        /// Parse HTML for List of RapidGator Links
+        /// </summary>
+        /// <param name="HTML">Text/HTML to Parse for Links</param>
+        /// <returns>Returns List of RapidGator Links</returns>
+        public static List<string> RgLinks(this string HTML)
+        {
+            List<string> matches = new List<string>();
+            string cmd = @"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?";
+            Regex ItemRegex = new Regex(cmd, RegexOptions.IgnoreCase);
+            foreach (Match ItemMatch in ItemRegex.Matches(HTML))
+            {
+                //Console.WriteLine(ItemMatch);
+                string val = ItemMatch.Value;
+
+                if (val.ToUpper().Contains("RAPIDGATOR.NET")) { matches.Add(val); }
+                if (val.ToUpper().Contains("RG.NET")) { matches.Add(val); }
+                if (val.ToUpper().Contains("RG.TO")) { matches.Add(val); }
+                if (val.ToUpper().Contains("SAFELINKING.NET")) { matches.Add(val); }
+            }
+            return matches;
+        }
+
+
+        /// <summary>
+        /// Parse HTML for List of .Zip Links
+        /// </summary>
+        /// <param name="HTML">Text/HTML to Parse for Links</param>
+        /// <returns>Returns List of RapidGator Links</returns>
+        public static List<string> ZipLinks(this string HTML)
+        {
+            List<string> matches = new List<string>();
+            string cmd = @"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?";
+            Regex ItemRegex = new Regex(cmd, RegexOptions.IgnoreCase);
+            foreach (Match ItemMatch in ItemRegex.Matches(HTML))
+            {
+                //Console.WriteLine(ItemMatch);
+                string val = ItemMatch.Value;
+
+                if (val.ToUpper().Contains(".ZIP")) { matches.Add(val); }
+            }
+            return matches;
+        }
+
+        /// <summary>
+        /// Parse HTML for List of IMDb.com Links
+        /// </summary>
+        /// <param name="HTML"></param>
+        /// <returns></returns>
+        public static List<string> IMDbLinks(this string HTML)
+        {
+            List<string> matches = new List<string>();
+            string cmd = @"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?";
+            Regex ItemRegex = new Regex(cmd, RegexOptions.IgnoreCase);
+            foreach (Match ItemMatch in ItemRegex.Matches(HTML))
+            {
+                string val = ItemMatch.Value;
+                if (val.ToUpper().Contains("IMDB.COM")) { matches.Add(val); }
+            }
+            return matches;
+        }
+
+        /// <summary>
+        /// Parses HTML, Returns list of Links Containing SiteURL in the Link
+        /// </summary>
+        /// <param name="HTML"></param>
+        /// <param name="SiteURL">Part of the Site URL Required in Text to Be Considered a Match</param>
+        /// <returns></returns>
+        public static List<string> SiteLinks(this string HTML, string SiteURL, string SiteURL2 = "", string SiteURL3 = "")
+        {
+            List<string> matches = new List<string>();
+            string cmd = @"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?";
+            Regex ItemRegex = new Regex(cmd, RegexOptions.IgnoreCase);
+            foreach (Match ItemMatch in ItemRegex.Matches(HTML))
+            {
+                string val = ItemMatch.Value;
+                if (val.ToUpper().Contains(SiteURL.ToUpper().Trim())) { matches.Add(val); }
+                if (SiteURL2 != "") { if (val.ToUpper().Contains(SiteURL2.ToUpper().Trim())) { matches.Add(val); } }
+                if (SiteURL3 != "") { if (val.ToUpper().Contains(SiteURL3.ToUpper().Trim())) { matches.Add(val); } }
+            }
+            return matches;
+        }
+
+        /// <summary>
+        /// Returns Text Between Two <XML>Tags</XML>
+        /// </summary>
+        /// <param name="Text">String Containg XML Content with Tag</param>
+        /// <param name="Tag">XML Tag to Return Text From</param>
+        /// <returns></returns>
+        public static string XML_Text(this string XMLText, string Tag = "<h5>")
+        {
+            if (!XMLText.Contains(Tag)) { return ""; }
+
+            if (!Tag.Contains("<") && !Tag.Contains(">")) { Tag = "<" + Tag + ">"; }
+            string end = Tag.Replace("<", "</");
+
+            int anstart = (XMLText.ToString().IndexOf(Tag) + Tag.Length);
+            int anend = (XMLText.ToString().IndexOf(end));
+            int anlen = 0;
+            if (anstart > 0 && anend > 0)
+            {
+                anlen = anend - anstart;
+            }
+
+            string Asset = XMLText.ToString().Substring(anstart, anlen);
+            return Asset;
+        }
 
 
         #region === Lists: Display  ===
@@ -1010,7 +1161,7 @@ namespace AHKExpressions
         /// <param name="dv"> </param>
         /// <param name=" List<int> list"> </param>
         /// <param name="ListName"> </param>
-        public static void List_To_GridInt(this DataGridView dv, List<int> list, string ListName = "List_View")
+        public static void List_To_Grid(this DataGridView dv, List<int> list, string ListName = "List_View")
         {
             //======= Create DataTable and Assign to DataGrid  =======
             DataTable dt = new DataTable();
@@ -1044,13 +1195,13 @@ namespace AHKExpressions
         /// <param name="ParentName"> </param>
         /// <param name="NoParent"> </param>
         /// <param name="cLearTV"> </param>
-        public static void List_To_TreeViewInt(this TreeView TV, List<int> LoadList, string ParentName = "List", bool NoParent = false, bool cLearTV = true)
+        public static void List_To_TreeView(this TreeView TV, List<int> LoadList, string ParentName = "List", bool NoParent = false, bool cLearTV = true)
         {
             if (cLearTV) { TV.Nodes.Clear(); }
 
-            if (!NoParent) { TreeViewList_Int(TV, LoadList, ParentName); }
+            if (!NoParent) { TreeViewList(TV, LoadList, ParentName); }
 
-            if (NoParent) { TreeViewList_Int(TV, LoadList); }
+            if (NoParent) { TreeViewList(TV, LoadList); }
         }
 
         /// <summary>populate ComboBox from List <string></summary>
@@ -1067,7 +1218,7 @@ namespace AHKExpressions
         /// <summary>populate ComboBox from List <int></summary>
         /// <param name="ComboBox cb"> </param>
         /// <param name=" List<string> LoadList"> </param>
-        public static void List_To_ComboBoxInt(this ComboBox cb, List<int> LoadList)
+        public static void List_To_ComboBox(this ComboBox cb, List<int> LoadList)
         {
             //Setup data binding
             cb.DataSource = LoadList;
@@ -1095,7 +1246,7 @@ namespace AHKExpressions
         /// <summary>populate ListBox from List <int></summary>
         /// <param name="ListBox listbox"> </param>
         /// <param name=" List<int> LoadList"> </param>
-        public static void List_To_ListBoxInt(this ListBox listbox, List<int> LoadList)
+        public static void List_To_ListBox(this ListBox listbox, List<int> LoadList)
         {
             //Setup data binding
             listbox.DataSource = LoadList;
@@ -1197,7 +1348,7 @@ namespace AHKExpressions
         /// <param name="TV"> </param>
         /// <param name="LoadList"> </param>
         /// <param name="NodeParentName"> </param>
-        public static void TreeViewList_Int(this TreeView TV, List<int> LoadList, string NodeParentName = "")
+        public static void TreeViewList(this TreeView TV, List<int> LoadList, string NodeParentName = "")
         {
             // if node parent name provided in parameters, use that as Node header. otherwise no header
             bool NoParent = true; if (NodeParentName.Trim() != "") { NoParent = false; }

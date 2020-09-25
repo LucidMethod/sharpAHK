@@ -163,7 +163,7 @@ namespace AHKExpressions
         /// <param name="Width">New Image Width</param>
         /// <param name="Height">New Image Height</param>
         /// <returns></returns>
-        public static Image ToImage(this string FilePath, int Width=0, int Height=0)
+        public static Image ToImage(this string FilePath, int Width=0, int Height=0, string ImageTag = "")
         {
             if (!File.Exists(FilePath)) { return null; }
 
@@ -173,13 +173,31 @@ namespace AHKExpressions
                 Icon a = Icon.ExtractAssociatedIcon((string)FilePath);
                 Image returnImage = ToImage(a);  // convert icon to image
 
+                if (ImageTag.Length > 0) { returnImage.Tag = ImageTag; }
+
                 if (Width != 0 || Height != 0) { return returnImage.Resize(Width, Height); }
 
                 return returnImage;  // return image
             }
             else
             {
-                if (FilePath.IsImage()) { return System.Drawing.Image.FromFile(FilePath);  }
+                if (FilePath.IsImage()) 
+                { 
+                    try
+                    {
+                        Image image = System.Drawing.Image.FromFile(FilePath);
+                        if (ImageTag.Length > 0) { image.Tag = ImageTag; }
+
+                        if (Width != 0 || Height != 0) { return image.Resize(Width, Height); }
+
+                        return image;
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                    
+                }
             }
             
             return null;
@@ -357,6 +375,7 @@ namespace AHKExpressions
         /// <returns></returns>
         public static Image Resize(this Image image, int newWidth, int newHeight)
         {
+            if (image == null) { return null; }
             //Image imgPhoto = Image.FromFile(ImagePath);
 
             int sourceWidth = image.Width;

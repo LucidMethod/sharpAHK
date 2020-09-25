@@ -28,7 +28,7 @@ namespace AutoHotkey.Interop.Util
 
             string processor_type = ProcessorType.Is32Bit() ? "x86" : "x64";
             //string relativePath = processor_type + "/AutoHotkey.dll";
-            string relativePath = "/lib/Util/" + processor_type + "/AutoHotkey.dll";
+            string relativePath = "lib/Util/" + processor_type + "/AutoHotkey.dll";
 
             if (File.Exists(relativePath)) { 
                 return SafeLibraryHandle.LoadLibrary(relativePath);

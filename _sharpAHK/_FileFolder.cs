@@ -82,16 +82,15 @@ namespace sharpAHK
             do
             {
                 string saveBackupFileName = BackupFileName + "." + FileCount;
-
+                
                 if (File.Exists(saveBackupFileName)) { FreeNameFound = false; FileCount++; continue; }
-
+                
                 if (!File.Exists(saveBackupFileName))
                 {
                     FreeNameFound = true;
                     FileBackedUp = FileCopy(FilePath, saveBackupFileName, true);
                     FileCopy(FilePath, BackupFileName, true);
                 }
-
 
             } while (FreeNameFound == false);
 
@@ -541,16 +540,37 @@ namespace sharpAHK
         {
             if (!ProgressDialog)
             {
-                // change overwrite bool to 1/0 
-                int overWrite = 0; if (OverWrite) { overWrite = 1; }
-                string source = SourcePattern.Replace(",", "`,");
-                string dest = DestPattern.Replace(",", "`,");
-                //string source = StringReplace(SourcePattern, ",", "`,", "ALL"); // fix illegal ahk chars
-                string AHKLine = "FileMove, " + source + ", " + dest + ", " + overWrite;  // ahk line to execute
-                ErrorLog_Setup(true, "Error Moving [ELV] Files"); // ErrorLevel Detection Enabled for this function in AHK 
-                Execute(AHKLine);   // execute AHK code and return variable value
-                if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
-                return false;  // error level detected - success = false
+                //// change overwrite bool to 1/0 
+                //int overWrite = 0; if (OverWrite) { overWrite = 1; }
+                //string source = SourcePattern.Replace(",", "`,");
+                //string dest = DestPattern.Replace(",", "`,");
+                ////string source = StringReplace(SourcePattern, ",", "`,", "ALL"); // fix illegal ahk chars
+                //string AHKLine = "FileMove, " + source + ", " + dest + ", " + overWrite;  // ahk line to execute
+                //ErrorLog_Setup(true, "Error Moving [ELV] Files"); // ErrorLevel Detection Enabled for this function in AHK 
+                //Execute(AHKLine);   // execute AHK code and return variable value
+                //if (!ahkGlobal.ErrorLevel) { return true; } // no error level - return true for success
+                //return false;  // error level detected - success = false
+
+                try
+                {
+                    Computer comp = new Computer();
+
+                    if (SourcePattern.IsDir()) // different command when moving a folder
+                    {
+                        comp.FileSystem.MoveDirectory(SourcePattern, DestPattern, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, UICancelOption.DoNothing);
+                    }
+                    else
+                    {
+                        comp.FileSystem.MoveFile(SourcePattern, DestPattern, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, UICancelOption.DoNothing);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MsgBox(ex.ToString());
+                    return false;
+                }
+                return true;
+
             }
             else  //=== C# FileMove Method - With Progress Dialog ===
             {
@@ -756,8 +776,8 @@ namespace sharpAHK
         /// <param name="LineNum">Which line to read (1 is the first, 2 the second, and so on). This can be an expression.</param>
         public string FileReadLine(string Filename, string LineNum)
         {
-            string AHKLine = "FileReadLine, OutputVar, " + Filename + "," + LineNum;  // ahk line to execute
-            ErrorLog_Setup(true, "Error Reading Line: " + LineNum + " From " + Filename); // ErrorLevel Detection Enabled for this function in AHK 
+            string AHKLine = "FileReadLine, OutputVar, " + Filename + "," + LineNum.ToString();  // ahk line to execute
+            ErrorLog_Setup(true, "Error Reading Line: " + LineNum.ToString() + " From " + Filename); // ErrorLevel Detection Enabled for this function in AHK 
             string OutVar = Execute(AHKLine, "OutputVar");   // execute AHK code and return variable value 
             return OutVar;
 
@@ -1712,18 +1732,20 @@ namespace sharpAHK
                 try { files = Directory.GetFiles("path_to_files").Where(file => Regex.IsMatch(file, @"^.+\.(" + SearchPattern + ")$")).ToArray(); } catch { }
             }
 
-
-            foreach (string file in files)  // loop through list of files and write file details to sqlite db
+            if (files != null)
             {
-                string addFile = file;
-                if (FileNameOnly) { addFile = FileName(file); }
-                if ((FileNameOnly) && (!IncludeExt)) { addFile = FileNameNoExt(file); }
+                foreach (string file in files)  // loop through list of files and write file details to sqlite db
+                {
+                    string addFile = file;
+                    if (FileNameOnly) { addFile = FileName(file); }
+                    if ((FileNameOnly) && (!IncludeExt)) { addFile = FileNameNoExt(file); }
 
-                // add file to list to return
-                FileList.Add(addFile);
+                    // add file to list to return
+                    FileList.Add(addFile);
+                }
+
+                if (SortAlpha) { FileList = ListSORT(FileList); }
             }
-
-            if (SortAlpha) { FileList = ListSORT(FileList); }
 
             return FileList;
         }
@@ -2223,8 +2245,15 @@ namespace sharpAHK
             {
                 // 3.
                 // Use FileInfo to get length of each file.
-                FileInfo info = new FileInfo(name);
-                if (info.Exists) { b += info.Length; }
+                try
+                {
+                    FileInfo info = new FileInfo(name);
+                    if (info.Exists) { b += info.Length; }
+                }
+                catch
+                {
+
+                }
             }
 
             string size = b.ToString();

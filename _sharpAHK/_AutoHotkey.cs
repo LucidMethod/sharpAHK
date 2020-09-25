@@ -24,7 +24,6 @@ namespace sharpAHK
 
             ahkGlobal.LoadedAHK = new List<string>(); // reset loaded ahk list
 
-
             Log("ahk.New_AHKSession();");
         }
 
